@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { useAuthStore } from "@/stores/auth.store";
 
 // Auth pages (eagerly loaded)
 import { LoginPage } from "@/features/auth/pages/LoginPage";
@@ -48,16 +49,42 @@ function PageLoader() {
   );
 }
 
+/** Redirect authenticated users away from login to the main app */
+function AuthRedirect({ children }: { children: React.ReactNode }) {
+  const { user, isLoading } = useAuthStore();
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (user) {
+    return <Navigate to="/performance" replace />;
+  }
+
+  return <>{children}</>;
+}
+
 export function AppRouter() {
   return (
     <Routes>
-      {/* Public routes */}
-      <Route path="/login" element={<LoginPage />} />
+      {/* Public routes — redirect to app if already authenticated */}
+      <Route
+        path="/login"
+        element={
+          <AuthRedirect>
+            <LoginPage />
+          </AuthRedirect>
+        }
+      />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/invite/accept" element={<AcceptInvitePage />} />
 
-      {/* Protected routes */}
+      {/* Protected routes — AppLayout wraps children with ProtectedRoute */}
       <Route element={<AppLayout />}>
         <Route
           path="/performance"
@@ -141,9 +168,9 @@ export function AppRouter() {
         />
       </Route>
 
-      {/* Redirect */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      {/* Default redirect */}
+      <Route path="/" element={<Navigate to="/performance" replace />} />
+      <Route path="*" element={<Navigate to="/performance" replace />} />
     </Routes>
   );
 }

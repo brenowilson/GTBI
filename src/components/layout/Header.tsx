@@ -1,3 +1,5 @@
+import { useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { Moon, Sun, LogOut, User, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -5,18 +7,23 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useTheme } from "@/app/providers/ThemeProvider";
 import { useAuthStore } from "@/stores/auth.store";
+import { useRestaurantStore } from "@/stores/restaurant.store";
+import { supabase } from "@/shared/lib/supabase";
 import { RestaurantSelector } from "./RestaurantSelector";
 import { MobileSidebar } from "./MobileSidebar";
 
 export function Header() {
+  const navigate = useNavigate();
   const { resolvedTheme, setTheme } = useTheme();
-  const { user } = useAuthStore();
+  const { user, reset: resetAuth } = useAuthStore();
+  const { reset: resetRestaurant } = useRestaurantStore();
 
   const initials = user?.full_name
     ?.split(" ")
@@ -28,6 +35,13 @@ export function Header() {
   const toggleTheme = () => {
     setTheme(resolvedTheme === "dark" ? "light" : "dark");
   };
+
+  const handleLogout = useCallback(async () => {
+    await supabase.auth.signOut();
+    resetAuth();
+    resetRestaurant();
+    navigate("/login");
+  }, [navigate, resetAuth, resetRestaurant]);
 
   return (
     <header className="flex h-16 items-center gap-4 border-b border-border bg-background px-4 md:px-6">
@@ -63,13 +77,27 @@ export function Header() {
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium leading-none">
+                  {user?.full_name ?? "Usuário"}
+                </p>
+                <p className="text-xs leading-none text-muted-foreground">
+                  {user?.email ?? ""}
+                </p>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
             <DropdownMenuItem className="flex items-center gap-2">
               <User className="h-4 w-4" />
               Perfil
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="flex items-center gap-2 text-destructive">
+            <DropdownMenuItem
+              className="flex items-center gap-2 text-destructive"
+              onClick={handleLogout}
+            >
               <LogOut className="h-4 w-4" />
               Sair
             </DropdownMenuItem>
