@@ -190,9 +190,10 @@ export function AppRouter() {
         />
       </Route>
 
-      {/* Default redirect */}
-      <Route path="/" element={<Navigate to="/performance" replace />} />
-      <Route path="*" element={<Navigate to="/performance" replace />} />
+      {/* Default redirect — unauthenticated users land on /login,
+          AuthRedirect there sends authenticated users to /performance */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }
