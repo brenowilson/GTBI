@@ -57,5 +57,3 @@ coverage/
 *.key
 credentials.json
 service-account.json
-
-.architecture/
