@@ -1,0 +1,124 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* GTBI Design System — Light Mode */
+    /* Derived from BRAND.md: iFood Red (#EA1D2C) palette */
+
+    --background: 0 0% 100%;
+    --foreground: 0 0% 24.3%;
+
+    --card: 0 0% 100% / 0.92;
+    --card-foreground: 0 0% 24.3%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 24.3%;
+
+    /* Primary = iFood Red #EA1D2C → HSL ~355 87% 52% */
+    --primary: 355 87% 52%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 24.3%;
+
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 35.3%;
+
+    /* Accent soft = #FFF0F2 → HSL ~350 100% 97% */
+    --accent: 350 100% 97%;
+    --accent-foreground: 355 87% 52%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Border = rgba(62,62,62,0.12) */
+    --border: 0 0% 24.3% / 0.12;
+    --input: 0 0% 24.3% / 0.12;
+    --ring: 355 87% 52% / 0.45;
+
+    --radius: 0.5rem;
+
+    /* Chart colors */
+    --chart-1: 355 87% 52%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 99%;
+    --sidebar-foreground: 0 0% 24.3%;
+    --sidebar-primary: 355 87% 52%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 350 100% 97%;
+    --sidebar-accent-foreground: 355 87% 52%;
+    --sidebar-border: 0 0% 24.3% / 0.12;
+    --sidebar-ring: 355 87% 52% / 0.45;
+  }
+
+  .dark {
+    /* GTBI Design System — Dark Mode */
+    /* Background = #0B0C10 → HSL ~225 19% 5% */
+    --background: 225 19% 5%;
+    --foreground: 220 14% 96%;
+
+    /* Surface = rgba(255,255,255,0.06) */
+    --card: 0 0% 100% / 0.06;
+    --card-foreground: 220 14% 96%;
+
+    --popover: 225 19% 7%;
+    --popover-foreground: 220 14% 96%;
+
+    --primary: 355 87% 52%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 225 19% 12%;
+    --secondary-foreground: 220 14% 96%;
+
+    --muted: 225 19% 12%;
+    --muted-foreground: 218 11% 80%;
+
+    /* Accent soft dark = rgba(234,29,44,0.14) */
+    --accent: 355 87% 52% / 0.14;
+    --accent-foreground: 355 87% 62%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Border = rgba(255,255,255,0.10) */
+    --border: 0 0% 100% / 0.10;
+    --input: 0 0% 100% / 0.10;
+    --ring: 355 87% 52% / 0.55;
+
+    /* Chart colors (dark) */
+    --chart-1: 355 87% 58%;
+    --chart-2: 173 58% 45%;
+    --chart-3: 197 37% 50%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+
+    /* Sidebar */
+    --sidebar-background: 225 19% 7%;
+    --sidebar-foreground: 220 14% 96%;
+    --sidebar-primary: 355 87% 52%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 355 87% 52% / 0.14;
+    --sidebar-accent-foreground: 355 87% 62%;
+    --sidebar-border: 0 0% 100% / 0.10;
+    --sidebar-ring: 355 87% 52% / 0.55;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
