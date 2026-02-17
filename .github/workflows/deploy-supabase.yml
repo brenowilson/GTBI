@@ -2,14 +2,13 @@ name: Deploy Backend (Supabase)
 
 on:
   push:
-    branches: [main]
+    branches: [main, development]
     paths:
       - "supabase/**"
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: production
 
     steps:
       - uses: actions/checkout@v4
@@ -18,8 +17,17 @@ jobs:
         with:
           version: latest
 
+      - name: Set project ref
+        id: config
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "project_ref=${{ secrets.SUPABASE_PROJECT_REF_PROD }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "project_ref=${{ secrets.SUPABASE_PROJECT_REF_DEV }}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Link Supabase Project
-        run: supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: supabase link --project-ref ${{ steps.config.outputs.project_ref }}
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
