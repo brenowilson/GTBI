@@ -23,16 +23,25 @@ Gerar PRD completo a partir do briefing em INPUT.md, seguindo template 09-prd-te
 ## PRD Gerado
 
 - **Fases de requisitos**: 5 fases (Foundation, Performance/Reports, Communication, Financial/Catalog, Admin/Polish)
-- **Requisitos funcionais**: 62 requisitos
-- **Decisoes pendentes**: 4 pontos marcados com [DECISAO]
+- **Requisitos funcionais**: 63 requisitos (adicionado FR-103 para roles customizadas)
+- **Decisoes pendentes**: 0 (todas resolvidas)
 - **Non-goals**: 14 itens explicitos
+
+## Decisoes Resolvidas
+
+| # | Decisao | Escolha |
+|---|---------|---------|
+| 1 | Autenticacao (FR-101) | Email/senha (com recuperacao de senha) |
+| 2 | Roles (FR-102, FR-103) | Admin built-in com acesso total + roles customizadas com permissoes granulares por entidade (CRUD) |
+| 3 | Horario geracao PDF (FR-205) | Segunda-feira as 06:00 BRT |
+| 4 | Dark mode (FR-112) | Light mode como padrao, dark disponivel via toggle |
 
 ## Verificacao de Consistencia
 
 | Doc | Status | Nota |
 |-----|--------|------|
 | 01-arquitetura.md | OK | Clean Architecture + Feature-Sliced Design respeitados |
-| 04-seguranca.md | OK | RLS, OWASP, Vault, LGPD incluidos |
+| 04-seguranca.md | OK | RLS, OWASP, Vault, LGPD, RBAC granular incluidos |
 | 05-testes.md | OK | Vitest + Testing Library na stack |
 | 09-prd-template.md | OK | Template seguido fielmente |
 | 10-input-projeto.md | OK | Todos os campos do INPUT validados |
@@ -40,4 +49,4 @@ Gerar PRD completo a partir do briefing em INPUT.md, seguindo template 09-prd-te
 | 15-pwa.md | OK | PWA instalavel, forced update, service worker |
 
 ## Conclusao
-PRD gerado com 62 requisitos funcionais em 5 fases, 4 decisoes pendentes para revisao humana. Aguardando resolucao das decisoes para finalizar.
+PRD finalizado com 63 requisitos funcionais em 5 fases. Todas as 4 decisoes resolvidas pelo usuario. Sistema RBAC dinamico com roles customizadas e permissoes granulares por entidade (CRUD). PRD.md salvo na raiz do projeto, pronto para execucao.

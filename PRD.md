@@ -51,19 +51,20 @@
 
 | ID | Requisito | Prioridade | Criterios de Aceite |
 |----|-----------|------------|---------------------|
-| FR-101 | Autenticacao por convite | HIGH | [DECISAO: Magic link ou email/senha? Para sistema interno com poucos usuarios, email/senha pode ser mais pratico] |
-| FR-102 | Sistema de roles e permissoes | HIGH | - Roles: [DECISAO: Quais roles? Sugestao: admin, analyst, viewer] / - Admin pode convidar, remover e alterar roles / - Permissoes verificadas em todas as rotas e acoes |
-| FR-103 | Convite de usuarios por email | HIGH | - Admin envia convite por email (Resend) / - Link de convite expira em 48h / - Usuario define senha (ou usa magic link) ao aceitar |
-| FR-104 | Gestao de membros (CRUD) | HIGH | - Listar membros com role e status / - Ativar/desativar membro / - Alterar role / - Auditoria de todas as mudancas |
-| FR-105 | Conectar conta iFood | HIGH | - Fluxo de autenticacao conforme API iFood (OAuth2 ou equivalente) / - Persistir tokens/credenciais com seguranca (Supabase Vault) / - Refresh automatico de token antes de expirar |
-| FR-106 | Multi-conta iFood | HIGH | - Conectar mais de uma conta iFood / - Listar contas conectadas com status / - Alternar entre contas / - Desconectar conta (com confirmacao) |
-| FR-107 | Listar restaurantes por conta iFood | HIGH | - Ao conectar conta, carregar restaurantes vinculados via API Merchant / - Exibir nome, status, dados basicos / - Selecionar restaurante para operar |
-| FR-108 | Modelo de dados base | HIGH | - Tabelas para todas as entidades iFood: merchants, catalogs, orders, events, logistics, reviews, financials, tickets / - RLS habilitado em todas / - Relacao: ifood_account -> restaurants -> entidades |
-| FR-109 | Engine de coleta de dados | HIGH | - Coleta diaria automatizada por restaurante / - Preferir webhooks/eventos iFood quando disponiveis / - Fallback: polling agendado / - Idempotencia (nao duplicar registros) / - Log de cada execucao (sucesso/falha/itens coletados) |
-| FR-110 | Armazenamento de historico | HIGH | - Historico diario por restaurante / - Snapshots de metricas preservados / - Dados suficientes para gerar relatorio sem chamar API novamente |
-| FR-111 | Dark mode | MEDIUM | - Disponivel desde o lancamento / - [DECISAO: Dark mode como padrao ou toggle com light como padrao?] / - Persistir preferencia do usuario |
-| FR-112 | Estrutura PWA base | HIGH | - Service worker registrado / - Manifest.json configurado / - Instalavel (add to home screen) |
-| FR-113 | Forced update | HIGH | - Ao detectar nova versao do app, bloquear uso / - Modal obrigatorio pedindo refresh/reload / - Nao permitir continuar com versao antiga |
+| FR-101 | Autenticacao por email/senha | HIGH | - Login com email + senha / - Senha com requisitos minimos (8 chars, 1 maiuscula, 1 numero) / - Recuperacao de senha por email (Resend) / - Sessao persistente com refresh token |
+| FR-102 | Role admin com acesso total | HIGH | - Role "admin" built-in com acesso irrestrito a todas as funcionalidades / - Admin pode criar, editar e remover roles customizadas / - Pelo menos 1 admin obrigatorio no sistema |
+| FR-103 | Roles customizadas com acesso granular | HIGH | - Admin cria roles com nome e descricao / - Permissoes granulares por entidade da aplicacao (restaurantes, relatorios, avaliacoes, chamados, financeiro, cardapio, usuarios) / - Controle CRUD por entidade (Create, Read, Update, Delete) / - Matriz de permissoes editavel na UI / - Role aplicada ao usuario no momento do convite ou alterada depois / - RLS e middleware verificam permissoes em todas as rotas e acoes |
+| FR-104 | Convite de usuarios por email | HIGH | - Admin envia convite por email (Resend) / - Link de convite expira em 48h / - Usuario define senha ao aceitar convite / - Admin seleciona role no momento do convite |
+| FR-105 | Gestao de membros (CRUD) | HIGH | - Listar membros com role e status / - Ativar/desativar membro / - Alterar role / - Auditoria de todas as mudancas |
+| FR-106 | Conectar conta iFood | HIGH | - Fluxo de autenticacao conforme API iFood (OAuth2 ou equivalente) / - Persistir tokens/credenciais com seguranca (Supabase Vault) / - Refresh automatico de token antes de expirar |
+| FR-107 | Multi-conta iFood | HIGH | - Conectar mais de uma conta iFood / - Listar contas conectadas com status / - Alternar entre contas / - Desconectar conta (com confirmacao) |
+| FR-108 | Listar restaurantes por conta iFood | HIGH | - Ao conectar conta, carregar restaurantes vinculados via API Merchant / - Exibir nome, status, dados basicos / - Selecionar restaurante para operar |
+| FR-109 | Modelo de dados base | HIGH | - Tabelas para todas as entidades iFood: merchants, catalogs, orders, events, logistics, reviews, financials, tickets / - Tabelas para RBAC: roles, permissions, role_permissions, user_roles / - RLS habilitado em todas / - Relacao: ifood_account -> restaurants -> entidades |
+| FR-110 | Engine de coleta de dados | HIGH | - Coleta diaria automatizada por restaurante / - Preferir webhooks/eventos iFood quando disponiveis / - Fallback: polling agendado / - Idempotencia (nao duplicar registros) / - Log de cada execucao (sucesso/falha/itens coletados) |
+| FR-111 | Armazenamento de historico | HIGH | - Historico diario por restaurante / - Snapshots de metricas preservados / - Dados suficientes para gerar relatorio sem chamar API novamente |
+| FR-112 | Dark mode | MEDIUM | - Disponivel desde o lancamento / - Light mode como padrao / - Toggle para dark mode acessivel no header/menu / - Persistir preferencia do usuario no banco |
+| FR-113 | Estrutura PWA base | HIGH | - Service worker registrado / - Manifest.json configurado / - Instalavel (add to home screen) |
+| FR-114 | Forced update | HIGH | - Ao detectar nova versao do app, bloquear uso / - Modal obrigatorio pedindo refresh/reload / - Nao permitir continuar com versao antiga |
 
 ### Fase 2: Performance, Funil e Relatorios (Core MVP)
 **Dependencias**: Fase 1 completa
@@ -75,7 +76,7 @@
 | FR-202 | Alertas de piora no funil | HIGH | - Alerta automatico quando qualquer etapa piora vs semana anterior / - Alerta visual na UI (cor/icone) / - Historico de alertas preservado |
 | FR-203 | Limites operacionais com alertas | HIGH | - Taxa cancelamento: alerta se >2% / - Tempo aberto: alerta se <95% / - Chamados em aberto: alerta se >3% / - Clientes novos vs recorrentes: alerta se >90% novos OU >90% recorrentes / - Mensagem contextual para cada alerta |
 | FR-204 | Dashboard de performance por restaurante | HIGH | - Visualizacao do funil com comparativo semanal / - Indicadores de limites operacionais / - Filtro por restaurante e periodo / - Carregamento <3s |
-| FR-205 | Geracao automatica de PDF semanal | HIGH | - Gerar 1 PDF por restaurante por semana (Seg-Dom) / - [DECISAO: Quando gerar automaticamente? Sugestao: segunda-feira as 06:00 BRT, apos dados consolidados] / - Conteudo: Financeiro + Algoritmo + Marketing (somente resultados, sem acoes/metas/estrategia) / - Armazenar PDF + metadados (restaurante, semana, data geracao, hash) |
+| FR-205 | Geracao automatica de PDF semanal | HIGH | - Gerar 1 PDF por restaurante por semana (Seg-Dom) / - Geracao automatica toda segunda-feira as 06:00 BRT (dados consolidados do domingo) / - Conteudo: Financeiro + Algoritmo + Marketing (somente resultados, sem acoes/metas/estrategia) / - Armazenar PDF + metadados (restaurante, semana, data geracao, hash) |
 | FR-206 | Estrutura do PDF — Financeiro | HIGH | - Pedidos / Faturamento / Ticket medio / Novos clientes / Melhor dia / Melhor horario / - Dados da semana (Seg-Dom) / - Observacoes curtas/flags permitidas, sem "o que fazer" |
 | FR-207 | Estrutura do PDF — Algoritmo | HIGH | - Visitas / Visualizacoes / Sacolas / Pedidos / Conversao / Cancelamento / Tempo aberto / Chamados / - Comparativo semanal quando aplicavel |
 | FR-208 | Estrutura do PDF — Marketing | HIGH | - Pedidos com promocao / Investimento / Receita gerada / ROAS |
@@ -141,7 +142,7 @@
 | ID | Requisito | Prioridade | Criterios de Aceite |
 |----|-----------|------------|---------------------|
 | FR-501 | Admin Panel — Dashboard | HIGH | - Visao geral: usuarios, contas iFood, restaurantes, relatorios / - Metricas de uso do sistema |
-| FR-502 | Admin Panel — Gestao de usuarios | HIGH | - CRUD de usuarios / - Alterar roles / - Ativar/desativar / - Historico de acoes |
+| FR-502 | Admin Panel — Gestao de usuarios e roles | HIGH | - CRUD de usuarios / - CRUD de roles customizadas / - Matriz de permissoes por role (entidade x CRUD) / - Atribuir/alterar role de usuario / - Ativar/desativar membro / - Historico de acoes |
 | FR-503 | Admin Panel — Criacao de notificacoes | HIGH | - Admin cria notificacao para usuarios / - Canais: email (Resend) e WhatsApp (Uazapi) / - Selecionar destinatarios / - Auditoria de envio |
 | FR-504 | Admin Panel — Visualizador de audit logs | HIGH | - Consultar logs de auditoria do sistema / - Filtros: usuario, acao, data, modulo / - Exportavel |
 | FR-505 | Central de Ajuda interna | MEDIUM | - Acessivel apenas por usuarios autenticados / - Conteudo de ajuda por modulo / - Pesquisavel |
@@ -276,3 +277,6 @@ Ver CLAUDE.md para estrutura completa (Clean Architecture + Feature-Sliced Desig
 | Auto-resposta | Resposta automatica a avaliacoes ou chamados (via IA ou Template) |
 | Job | Tarefa assincrona (ex: geracao de imagem) executada em background |
 | Playbook GT | Metodologia da GT Consultoria para analise e acao em restaurantes iFood |
+| Role | Papel atribuido a um usuario que define suas permissoes no sistema |
+| Permissao | Acesso granular a uma entidade (CRUD) atribuido a uma role |
+| RBAC | Role-Based Access Control — modelo de controle de acesso baseado em roles |
