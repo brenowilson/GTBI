@@ -86,7 +86,6 @@ CREATE POLICY "audit_logs_insert_service_role"
   ON public.audit_logs
   FOR INSERT
   TO authenticated
-  USING (false)
   WITH CHECK (false);
 
 COMMENT ON TABLE public.audit_logs IS 'Immutable audit trail for all critical actions';
