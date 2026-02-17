@@ -40,6 +40,12 @@ const AdminPage = lazy(() =>
 const SettingsPage = lazy(() =>
   import("@/features/settings/pages/SettingsPage").then((m) => ({ default: m.SettingsPage }))
 );
+const HelpPage = lazy(() =>
+  import("@/features/help/pages/HelpPage").then((m) => ({ default: m.HelpPage }))
+);
+const HelpArticlePage = lazy(() =>
+  import("@/features/help/pages/HelpArticlePage").then((m) => ({ default: m.HelpArticlePage }))
+);
 
 function PageLoader() {
   return (
@@ -163,6 +169,22 @@ export function AppRouter() {
           element={
             <Suspense fallback={<PageLoader />}>
               <SettingsPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/help"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <HelpPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/help/:articleId"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <HelpArticlePage />
             </Suspense>
           }
         />

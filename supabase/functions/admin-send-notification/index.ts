@@ -10,11 +10,6 @@ import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { sendEmail, buildEmailHtml } from "../_shared/resend.ts";
 import { sendWhatsAppMessage } from "../_shared/uazapi.ts";
 
-interface Recipient {
-  user_id: string;
-  phone?: string;
-}
-
 /**
  * POST /admin-send-notification
  *

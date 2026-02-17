@@ -101,7 +101,7 @@ const handler = withMiddleware(
     }
 
     // Sign in the new user to get a session
-    const { data: signInData, error: signInError } = await adminClient.auth.admin.generateLink({
+    const { data: _signInData, error: _signInError } = await adminClient.auth.admin.generateLink({
       type: "magiclink",
       email: invitation.email,
     });

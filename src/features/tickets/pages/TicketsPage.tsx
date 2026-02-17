@@ -1,44 +1,54 @@
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TicketCard } from "../components/TicketCard";
 import { TicketAutoReplyControls } from "../components/TicketAutoReplyControls";
-
-const mockTickets = [
-  {
-    id: "t1",
-    subject: "Pedido não entregue",
-    status: "open" as const,
-    createdAt: "2026-02-16T15:30:00Z",
-    messagesCount: 3,
-  },
-  {
-    id: "t2",
-    subject: "Item errado no pedido #4521",
-    status: "in_progress" as const,
-    createdAt: "2026-02-15T10:00:00Z",
-    messagesCount: 5,
-  },
-  {
-    id: "t3",
-    subject: "Solicitação de reembolso",
-    status: "resolved" as const,
-    createdAt: "2026-02-14T08:45:00Z",
-    messagesCount: 7,
-  },
-  {
-    id: "t4",
-    subject: null,
-    status: "closed" as const,
-    createdAt: "2026-02-10T12:00:00Z",
-    messagesCount: 2,
-  },
-];
-
-const mockRestaurants = [
-  { id: "r1", name: "Restaurante Central", enabled: true, mode: "ai" as const },
-  { id: "r2", name: "Restaurante Norte", enabled: false, mode: "template" as const },
-];
+import { useTickets, useTicketAutoReply } from "../hooks";
+import { useRestaurantStore } from "@/stores/restaurant.store";
 
 export function TicketsPage() {
+  const { data: tickets, isLoading, error, refetch } = useTickets();
+  const autoReply = useTicketAutoReply();
+  const { selectedRestaurant } = useRestaurantStore();
+
+  const restaurants = selectedRestaurant
+    ? [
+        {
+          id: selectedRestaurant.id,
+          name: selectedRestaurant.name,
+          enabled: selectedRestaurant.ticket_auto_reply_enabled,
+          mode: selectedRestaurant.ticket_auto_reply_mode,
+        },
+      ]
+    : [];
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-4">
+        <p className="text-muted-foreground">Erro ao carregar chamados.</p>
+        <Button variant="outline" onClick={() => refetch()}>
+          Tentar novamente
+        </Button>
+      </div>
+    );
+  }
+
+  // Map tickets from API (snake_case) to component (camelCase)
+  const mappedTickets = (tickets ?? []).map((t) => ({
+    id: t.id,
+    subject: t.subject,
+    status: t.status,
+    createdAt: t.created_at,
+    messagesCount: 0,
+  }));
+
   return (
     <div className="space-y-6">
       <div>
@@ -55,8 +65,13 @@ export function TicketsPage() {
         </TabsList>
 
         <TabsContent value="tickets" className="space-y-4">
+          {mappedTickets.length === 0 && (
+            <div className="flex flex-col items-center justify-center gap-2 py-12 text-muted-foreground">
+              <p>Nenhum chamado encontrado.</p>
+            </div>
+          )}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {mockTickets.map((ticket) => (
+            {mappedTickets.map((ticket) => (
               <TicketCard key={ticket.id} ticket={ticket} />
             ))}
           </div>
@@ -64,9 +79,13 @@ export function TicketsPage() {
 
         <TabsContent value="auto-reply" className="space-y-4">
           <TicketAutoReplyControls
-            globalEnabled={false}
-            globalMode="template"
-            restaurants={mockRestaurants}
+            globalEnabled={autoReply.isEnabled}
+            globalMode={autoReply.mode}
+            restaurants={restaurants}
+            onGlobalToggle={(enabled) => autoReply.toggle.mutate(enabled)}
+            onGlobalModeChange={(mode) =>
+              autoReply.updateSettings.mutate({ mode })
+            }
           />
         </TabsContent>
       </Tabs>

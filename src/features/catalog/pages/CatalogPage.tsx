@@ -1,74 +1,23 @@
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CatalogItemCard } from "../components/CatalogItemCard";
 import { ImageWorkflowModal } from "../components/ImageWorkflowModal";
+import { useCatalogItems, useImageJobRealtime } from "../hooks";
 import type { CatalogItem } from "@/entities/catalog-item/model";
-
-const mockItems: CatalogItem[] = [
-  {
-    id: "cat-1",
-    restaurant_id: "r1",
-    ifood_item_id: "ifood-1",
-    category_id: "c1",
-    category_name: "Pratos Principais",
-    name: "X-Burguer Especial",
-    description: "Hambúrguer artesanal com queijo cheddar, bacon e molho especial",
-    price: 32.9,
-    image_url: null,
-    is_available: true,
-    created_at: "2026-01-15T10:00:00Z",
-    updated_at: "2026-02-10T14:30:00Z",
-  },
-  {
-    id: "cat-2",
-    restaurant_id: "r1",
-    ifood_item_id: "ifood-2",
-    category_id: "c1",
-    category_name: "Pratos Principais",
-    name: "Pizza Margherita",
-    description: "Pizza tradicional com molho de tomate, mussarela e manjericão",
-    price: 45.0,
-    image_url: null,
-    is_available: true,
-    created_at: "2026-01-15T10:00:00Z",
-    updated_at: "2026-02-10T14:30:00Z",
-  },
-  {
-    id: "cat-3",
-    restaurant_id: "r1",
-    ifood_item_id: "ifood-3",
-    category_id: "c2",
-    category_name: "Bebidas",
-    name: "Suco Natural de Laranja",
-    description: "Suco natural feito na hora, 500ml",
-    price: 12.0,
-    image_url: null,
-    is_available: false,
-    created_at: "2026-01-15T10:00:00Z",
-    updated_at: "2026-02-10T14:30:00Z",
-  },
-  {
-    id: "cat-4",
-    restaurant_id: "r1",
-    ifood_item_id: "ifood-4",
-    category_id: "c3",
-    category_name: "Sobremesas",
-    name: "Petit Gâteau",
-    description: "Bolo quente de chocolate com sorvete de creme",
-    price: 22.5,
-    image_url: null,
-    is_available: true,
-    created_at: "2026-01-15T10:00:00Z",
-    updated_at: "2026-02-10T14:30:00Z",
-  },
-];
 
 export function CatalogPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<CatalogItem | null>(null);
 
-  const filteredItems = mockItems.filter(
+  const filters = searchTerm ? { search: searchTerm } : undefined;
+  const { data: items, isLoading, error, refetch } = useCatalogItems(filters);
+
+  // Subscribe to real-time image job updates
+  useImageJobRealtime();
+
+  const filteredItems = (items ?? []).filter(
     (item) =>
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.category_name?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -77,6 +26,25 @@ export function CatalogPage() {
   function handleOpenImageWorkflow(item: CatalogItem) {
     setSelectedItem(item);
     setImageModalOpen(true);
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-4">
+        <p className="text-muted-foreground">Erro ao carregar catálogo.</p>
+        <Button variant="outline" onClick={() => refetch()}>
+          Tentar novamente
+        </Button>
+      </div>
+    );
   }
 
   return (

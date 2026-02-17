@@ -1,23 +1,57 @@
+import { Button } from "@/components/ui/button";
 import { FunnelChart } from "../components/FunnelChart";
 import { FunnelStepCard } from "../components/FunnelStepCard";
 import { OperationalLimitsPanel } from "../components/OperationalLimitsPanel";
+import { usePerformanceData } from "../hooks";
 
-const mockFunnelData = [
-  { step: "Visitas", current: 12500, previous: 11800 },
-  { step: "Visualizações", current: 8200, previous: 7900 },
-  { step: "Sacola", current: 3100, previous: 2850 },
-  { step: "Revisão", current: 2400, previous: 2200 },
-  { step: "Concluídos", current: 1800, previous: 1650 },
-];
-
-const mockOperationalLimits = {
-  cancellationRate: 1.8,
-  openTimeRate: 96.5,
-  openTicketsRate: 2.1,
-  newCustomersRate: 35.2,
+const STEP_LABELS: Record<string, string> = {
+  visits: "Visitas",
+  views: "Visualizações",
+  to_cart: "Sacola",
+  checkout: "Revisão",
+  completed: "Concluídos",
 };
 
+const FUNNEL_KEYS = ["visits", "views", "to_cart", "checkout", "completed"] as const;
+
 export function PerformancePage() {
+  const { data, isLoading, error, refetch } = usePerformanceData();
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-4">
+        <p className="text-muted-foreground">Erro ao carregar dados de performance.</p>
+        <Button variant="outline" onClick={() => refetch()}>
+          Tentar novamente
+        </Button>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
+        <p>Nenhum dado de performance encontrado.</p>
+      </div>
+    );
+  }
+
+  const { current, previous } = data;
+
+  const funnelData = FUNNEL_KEYS.map((key) => ({
+    step: STEP_LABELS[key] ?? key,
+    current: current[key],
+    previous: previous?.[key] ?? 0,
+  }));
+
   return (
     <div className="space-y-6">
       <div>
@@ -27,10 +61,10 @@ export function PerformancePage() {
         </p>
       </div>
 
-      <FunnelChart data={mockFunnelData} />
+      <FunnelChart data={funnelData} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        {mockFunnelData.map((item) => (
+        {funnelData.map((item) => (
           <FunnelStepCard
             key={item.step}
             step={item.step}
@@ -41,10 +75,10 @@ export function PerformancePage() {
       </div>
 
       <OperationalLimitsPanel
-        cancellationRate={mockOperationalLimits.cancellationRate}
-        openTimeRate={mockOperationalLimits.openTimeRate}
-        openTicketsRate={mockOperationalLimits.openTicketsRate}
-        newCustomersRate={mockOperationalLimits.newCustomersRate}
+        cancellationRate={current.cancellation_rate}
+        openTimeRate={current.open_time_rate}
+        openTicketsRate={current.open_tickets_rate}
+        newCustomersRate={current.new_customers_rate}
       />
     </div>
   );

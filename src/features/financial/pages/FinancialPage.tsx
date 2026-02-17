@@ -1,44 +1,52 @@
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FinancialSummaryCard } from "../components/FinancialSummaryCard";
 import { FinancialBreakdown } from "../components/FinancialBreakdown";
 import { ExportButtons } from "../components/ExportButtons";
-import type { FinancialEntryType } from "@/entities/financial/model";
-
-const mockBreakdown: {
-  entryType: FinancialEntryType;
-  total: number;
-  count: number;
-}[] = [
-  { entryType: "revenue", total: 45230.5, count: 320 },
-  { entryType: "fee", total: -3200.0, count: 320 },
-  { entryType: "commission", total: -5428.0, count: 320 },
-  { entryType: "delivery_fee", total: -2150.0, count: 280 },
-  { entryType: "promotion", total: -1500.0, count: 15 },
-  { entryType: "refund", total: -890.0, count: 8 },
-  { entryType: "adjustment", total: 350.0, count: 3 },
-];
+import { useFinancialSummary, useFinancialExport } from "../hooks";
 
 export function FinancialPage() {
   const [startDate, setStartDate] = useState("2026-02-01");
   const [endDate, setEndDate] = useState("2026-02-17");
 
-  const totalPositive = mockBreakdown
-    .filter((item) => item.total > 0)
-    .reduce((sum, item) => sum + item.total, 0);
+  const { data: summary, isLoading, error, refetch } = useFinancialSummary(startDate, endDate);
+  const exportMutation = useFinancialExport();
 
-  const totalNegative = Math.abs(
-    mockBreakdown
-      .filter((item) => item.total < 0)
-      .reduce((sum, item) => sum + item.total, 0)
-  );
-
-  const net = totalPositive - totalNegative;
-
-  function handleExport(_format: "csv" | "xls") {
-    // Placeholder for export logic
+  function handleExport(format: "csv" | "xls") {
+    exportMutation.mutate({ startDate, endDate, format });
   }
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-4">
+        <p className="text-muted-foreground">Erro ao carregar dados financeiros.</p>
+        <Button variant="outline" onClick={() => refetch()}>
+          Tentar novamente
+        </Button>
+      </div>
+    );
+  }
+
+  const totalPositive = summary?.total_positive ?? 0;
+  const totalNegative = summary?.total_negative ?? 0;
+  const net = summary?.net ?? 0;
+
+  // Map breakdown from API (snake_case) to component (camelCase)
+  const mappedBreakdown = (summary?.breakdown ?? []).map((item) => ({
+    entryType: item.entry_type,
+    total: item.total,
+    count: item.count,
+  }));
 
   return (
     <div className="space-y-6">
@@ -81,7 +89,7 @@ export function FinancialPage() {
         net={net}
       />
 
-      <FinancialBreakdown items={mockBreakdown} />
+      <FinancialBreakdown items={mappedBreakdown} />
     </div>
   );
 }

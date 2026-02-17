@@ -8,6 +8,7 @@ import {
   UtensilsCrossed,
   Settings,
   Shield,
+  HelpCircle,
 } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -21,6 +22,7 @@ const NAV_ITEMS = [
   { to: "/catalog", label: "Cardápio", icon: UtensilsCrossed },
   { to: "/settings", label: "Configurações", icon: Settings },
   { to: "/admin", label: "Admin", icon: Shield },
+  { to: "/help", label: "Ajuda", icon: HelpCircle },
 ];
 
 export function Sidebar() {

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,52 +11,90 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/shared/lib/cn";
 import { TicketThread } from "../components/TicketThread";
+import { useTicket, useTicketMessages, useSendTicketMessage } from "../hooks";
 
-const mockMessages = [
-  {
-    sender: "customer" as const,
-    content: "Olá, meu pedido não chegou e já faz 2 horas. Número do pedido: #4521",
-    sentAt: "2026-02-16T15:30:00Z",
-  },
-  {
-    sender: "system" as const,
-    content: "Chamado aberto automaticamente pelo sistema.",
-    sentAt: "2026-02-16T15:30:01Z",
-  },
-  {
-    sender: "restaurant" as const,
-    content: "Olá! Sentimos muito pelo inconveniente. Vamos verificar com o entregador o status da entrega.",
-    sentAt: "2026-02-16T15:45:00Z",
-  },
-  {
-    sender: "customer" as const,
-    content: "Ok, aguardo retorno.",
-    sentAt: "2026-02-16T15:50:00Z",
-  },
-  {
-    sender: "restaurant" as const,
-    content: "Identificamos que houve um problema com o entregador. Estamos providenciando o reenvio do pedido. Deve chegar em até 40 minutos.",
-    sentAt: "2026-02-16T16:00:00Z",
-  },
-];
+const STATUS_LABELS: Record<string, string> = {
+  open: "Aberto",
+  in_progress: "Em andamento",
+  resolved: "Resolvido",
+  closed: "Fechado",
+};
+
+const STATUS_STYLES: Record<string, string> = {
+  open: "bg-blue-100 text-blue-800 border-blue-200",
+  in_progress: "bg-yellow-100 text-yellow-800 border-yellow-200",
+  resolved: "bg-green-100 text-green-800 border-green-200",
+  closed: "bg-gray-100 text-gray-800 border-gray-200",
+};
 
 export function TicketDetailPage() {
+  const { id } = useParams<{ id: string }>();
   const [replyContent, setReplyContent] = useState("");
+
+  const { data: ticket, isLoading: ticketLoading, error: ticketError, refetch } = useTicket(id);
+  const { data: messages, isLoading: messagesLoading } = useTicketMessages(id);
+  const sendMessage = useSendTicketMessage();
+
+  function handleSendReply() {
+    if (!id || replyContent.trim().length === 0) return;
+    sendMessage.mutate(
+      { ticketId: id, content: replyContent.trim() },
+      { onSuccess: () => setReplyContent("") },
+    );
+  }
+
+  const isLoading = ticketLoading || messagesLoading;
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (ticketError) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-4">
+        <p className="text-muted-foreground">Erro ao carregar chamado.</p>
+        <Button variant="outline" onClick={() => refetch()}>
+          Tentar novamente
+        </Button>
+      </div>
+    );
+  }
+
+  if (!ticket) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
+        <p>Chamado não encontrado.</p>
+      </div>
+    );
+  }
+
+  const status = ticket.status ?? "open";
+
+  // Map messages from API (snake_case) to component (camelCase)
+  const mappedMessages = (messages ?? []).map((m) => ({
+    sender: m.sender,
+    content: m.content,
+    sentAt: m.sent_at ?? m.created_at,
+  }));
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
-            Pedido não entregue
+            {ticket.subject ?? "Sem assunto"}
           </h1>
-          <p className="text-muted-foreground">Chamado #t1</p>
+          <p className="text-muted-foreground">Chamado #{ticket.id}</p>
         </div>
         <Badge
           variant="outline"
-          className={cn("bg-blue-100 text-blue-800 border-blue-200")}
+          className={cn(STATUS_STYLES[status] ?? STATUS_STYLES.open)}
         >
-          Aberto
+          {STATUS_LABELS[status] ?? status}
         </Badge>
       </div>
 
@@ -64,7 +103,7 @@ export function TicketDetailPage() {
           <CardTitle className="text-base">Conversa</CardTitle>
         </CardHeader>
         <CardContent>
-          <TicketThread messages={mockMessages} />
+          <TicketThread messages={mappedMessages} />
         </CardContent>
       </Card>
 
@@ -79,8 +118,11 @@ export function TicketDetailPage() {
             onChange={(e) => setReplyContent(e.target.value)}
             rows={3}
           />
-          <Button disabled={replyContent.trim().length === 0}>
-            Enviar resposta
+          <Button
+            disabled={replyContent.trim().length === 0 || sendMessage.isPending}
+            onClick={handleSendReply}
+          >
+            {sendMessage.isPending ? "Enviando..." : "Enviar resposta"}
           </Button>
         </CardContent>
       </Card>

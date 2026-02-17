@@ -1,51 +1,13 @@
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReviewCard } from "../components/ReviewCard";
 import { AutoReplyControls } from "../components/AutoReplyControls";
 import { TemplateEditor } from "../components/TemplateEditor";
+import { useReviews, useAutoReplySettings } from "../hooks";
+import { useRestaurantStore } from "@/stores/restaurant.store";
 
-const mockReviews = [
-  {
-    rating: 5,
-    comment: "Comida excelente! Chegou rápido e bem embalada.",
-    customerName: "Maria S.",
-    date: "2026-02-15T14:30:00Z",
-    response: "Obrigado pela avaliação, Maria! Ficamos felizes que gostou!",
-    responseStatus: "sent" as const,
-  },
-  {
-    rating: 3,
-    comment: "Pedido veio incompleto, faltou a bebida.",
-    customerName: "João P.",
-    date: "2026-02-14T20:00:00Z",
-    response: null,
-    responseStatus: null,
-  },
-  {
-    rating: 1,
-    comment: "Demorou muito e a comida chegou fria.",
-    customerName: "Ana L.",
-    date: "2026-02-13T19:15:00Z",
-    response: "Sentimos muito pela experiência, Ana. Já estamos tomando providências.",
-    responseStatus: "pending" as const,
-  },
-  {
-    rating: 4,
-    comment: null,
-    customerName: null,
-    date: "2026-02-12T12:00:00Z",
-    response: null,
-    responseStatus: null,
-  },
-];
-
-const mockRestaurants = [
-  { id: "r1", name: "Restaurante Central", enabled: true, mode: "ai" as const },
-  { id: "r2", name: "Restaurante Norte", enabled: false, mode: "template" as const },
-  { id: "r3", name: "Restaurante Sul", enabled: true, mode: "template" as const },
-];
-
-const mockPlaceholders = [
+const TEMPLATE_PLACEHOLDERS = [
   "nome_cliente",
   "nome_restaurante",
   "nota",
@@ -53,9 +15,64 @@ const mockPlaceholders = [
 ];
 
 export function ReviewsPage() {
-  const [template, setTemplate] = useState(
-    "Olá {nome_cliente}, agradecemos sua avaliação no {nome_restaurante}!"
-  );
+  const { data: reviews, isLoading, error, refetch } = useReviews();
+  const autoReply = useAutoReplySettings();
+  const { selectedRestaurant } = useRestaurantStore();
+
+  const [localTemplate, setLocalTemplate] = useState<string | null>(null);
+
+  const templateValue = localTemplate ?? autoReply.template ?? "";
+
+  function handleTemplateChange(value: string) {
+    setLocalTemplate(value);
+  }
+
+  function handleTemplateSave() {
+    autoReply.updateSettings.mutate(
+      { mode: autoReply.mode, template: localTemplate ?? "" },
+      { onSuccess: () => setLocalTemplate(null) },
+    );
+  }
+
+  const restaurants = selectedRestaurant
+    ? [
+        {
+          id: selectedRestaurant.id,
+          name: selectedRestaurant.name,
+          enabled: selectedRestaurant.review_auto_reply_enabled,
+          mode: selectedRestaurant.review_auto_reply_mode,
+        },
+      ]
+    : [];
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-4">
+        <p className="text-muted-foreground">Erro ao carregar avaliações.</p>
+        <Button variant="outline" onClick={() => refetch()}>
+          Tentar novamente
+        </Button>
+      </div>
+    );
+  }
+
+  // Map reviews from API (snake_case) to component (camelCase)
+  const mappedReviews = (reviews ?? []).map((r) => ({
+    rating: r.rating,
+    comment: r.comment,
+    customerName: r.customer_name,
+    date: r.review_date,
+    response: r.response,
+    responseStatus: r.response_status,
+  }));
 
   return (
     <div className="space-y-6">
@@ -73,8 +90,13 @@ export function ReviewsPage() {
         </TabsList>
 
         <TabsContent value="reviews" className="space-y-4">
+          {mappedReviews.length === 0 && (
+            <div className="flex flex-col items-center justify-center gap-2 py-12 text-muted-foreground">
+              <p>Nenhuma avaliação encontrada.</p>
+            </div>
+          )}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {mockReviews.map((review, index) => (
+            {mappedReviews.map((review, index) => (
               <ReviewCard key={index} review={review} />
             ))}
           </div>
@@ -82,15 +104,19 @@ export function ReviewsPage() {
 
         <TabsContent value="auto-reply" className="space-y-4">
           <AutoReplyControls
-            globalEnabled={true}
-            globalMode="ai"
-            restaurants={mockRestaurants}
+            globalEnabled={autoReply.isEnabled}
+            globalMode={autoReply.mode}
+            restaurants={restaurants}
+            onGlobalToggle={(enabled) => autoReply.toggle.mutate(enabled)}
+            onGlobalModeChange={(mode) =>
+              autoReply.updateSettings.mutate({ mode })
+            }
           />
           <TemplateEditor
-            template={template}
-            onChange={setTemplate}
-            onSave={() => {}}
-            placeholders={mockPlaceholders}
+            template={templateValue}
+            onChange={handleTemplateChange}
+            onSave={handleTemplateSave}
+            placeholders={TEMPLATE_PLACEHOLDERS}
           />
         </TabsContent>
       </Tabs>
