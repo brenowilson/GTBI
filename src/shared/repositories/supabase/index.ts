@@ -1,0 +1,25 @@
+import { SupabaseUserRepository } from "./UserRepository";
+import { SupabaseIfoodAccountRepository } from "./IfoodAccountRepository";
+import { SupabaseRestaurantRepository } from "./RestaurantRepository";
+import { SupabaseReportRepository } from "./ReportRepository";
+import { SupabaseActionRepository } from "./ActionRepository";
+import { SupabaseReviewRepository } from "./ReviewRepository";
+import { SupabaseTicketRepository } from "./TicketRepository";
+import { SupabaseFinancialRepository } from "./FinancialRepository";
+import { SupabaseCatalogRepository } from "./CatalogRepository";
+import { SupabaseImageJobRepository } from "./ImageJobRepository";
+import { SupabaseChecklistRepository } from "./ChecklistRepository";
+import { SupabaseAdminRepository } from "./AdminRepository";
+
+export const userRepository = new SupabaseUserRepository();
+export const ifoodAccountRepository = new SupabaseIfoodAccountRepository();
+export const restaurantRepository = new SupabaseRestaurantRepository();
+export const reportRepository = new SupabaseReportRepository();
+export const actionRepository = new SupabaseActionRepository();
+export const reviewRepository = new SupabaseReviewRepository();
+export const ticketRepository = new SupabaseTicketRepository();
+export const financialRepository = new SupabaseFinancialRepository();
+export const catalogRepository = new SupabaseCatalogRepository();
+export const imageJobRepository = new SupabaseImageJobRepository();
+export const checklistRepository = new SupabaseChecklistRepository();
+export const adminRepository = new SupabaseAdminRepository();
