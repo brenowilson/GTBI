@@ -24,22 +24,30 @@ jobs:
         with:
           version: latest
 
-      - name: Set remote name
+      - name: Set environment variables
         id: config
         run: |
           TARGET="${{ inputs.environment || github.ref_name }}"
           if [ "$TARGET" = "main" ] || [ "$TARGET" = "production" ]; then
-            echo "remote=production" >> "$GITHUB_OUTPUT"
+            echo "project_ref=${{ secrets.SUPABASE_PROJECT_REF_PROD }}" >> "$GITHUB_OUTPUT"
+            echo "db_password=${{ secrets.SUPABASE_DB_PASSWORD_PROD }}" >> "$GITHUB_OUTPUT"
           else
-            echo "remote=development" >> "$GITHUB_OUTPUT"
+            echo "project_ref=${{ secrets.SUPABASE_PROJECT_REF_DEV }}" >> "$GITHUB_OUTPUT"
+            echo "db_password=${{ secrets.SUPABASE_DB_PASSWORD_DEV }}" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Push Database Migrations
-        run: supabase db push --remote ${{ steps.config.outputs.remote }}
+      - name: Link Supabase Project
+        run: supabase link --project-ref ${{ steps.config.outputs.project_ref }}
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
+      - name: Push Database Migrations
+        run: supabase db push
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ steps.config.outputs.db_password }}
+
       - name: Deploy Edge Functions
-        run: supabase functions deploy --remote ${{ steps.config.outputs.remote }}
+        run: supabase functions deploy
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}

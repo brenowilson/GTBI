@@ -1,9 +1,3 @@
-[remotes.production]
-project_id = "dmqrvkacqklqhvkcedqm"
-
-[remotes.development]
-project_id = "cmonneuidbtksdwtpyql"
-
 [storage]
 enabled = true
 file_size_limit = "50MiB"
