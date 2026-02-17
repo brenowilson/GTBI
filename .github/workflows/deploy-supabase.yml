@@ -24,27 +24,22 @@ jobs:
         with:
           version: latest
 
-      - name: Set project ref
+      - name: Set remote name
         id: config
         run: |
           TARGET="${{ inputs.environment || github.ref_name }}"
           if [ "$TARGET" = "main" ] || [ "$TARGET" = "production" ]; then
-            echo "project_ref=${{ secrets.SUPABASE_PROJECT_REF_PROD }}" >> "$GITHUB_OUTPUT"
+            echo "remote=production" >> "$GITHUB_OUTPUT"
           else
-            echo "project_ref=${{ secrets.SUPABASE_PROJECT_REF_DEV }}" >> "$GITHUB_OUTPUT"
+            echo "remote=development" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Link Supabase Project
-        run: supabase link --project-ref ${{ steps.config.outputs.project_ref }}
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-
       - name: Push Database Migrations
-        run: supabase db push
+        run: supabase db push --remote ${{ steps.config.outputs.remote }}
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
       - name: Deploy Edge Functions
-        run: supabase functions deploy
+        run: supabase functions deploy --remote ${{ steps.config.outputs.remote }}
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
