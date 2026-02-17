@@ -207,7 +207,7 @@ Ver CLAUDE.md para estrutura completa (Clean Architecture + Feature-Sliced Desig
 | OpenAI — Text | Respostas IA (avaliacoes, chamados) | OPENAI_API_KEY | - |
 | OpenAI — gpt-image-1 | Geracao/edicao de imagens de produtos | OPENAI_API_KEY | - |
 | Resend | Email transacional (convites, relatorios, notificacoes) | RESEND_API_KEY | - |
-| Uazapi | WhatsApp (envio de PDF, notificacoes) | UAZAPI_TOKEN | - |
+| Uazapi | WhatsApp (envio de PDF, notificacoes) | UAZAPI_SERVER_URL + UAZAPI_ADMIN_TOKEN | - |
 
 ---
 
