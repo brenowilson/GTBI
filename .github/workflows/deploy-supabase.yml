@@ -5,6 +5,15 @@ on:
     branches: [main, development]
     paths:
       - "supabase/**"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        type: choice
+        options:
+          - development
+          - production
 
 jobs:
   deploy:
@@ -20,7 +29,8 @@ jobs:
       - name: Set project ref
         id: config
         run: |
-          if [ "${{ github.ref_name }}" = "main" ]; then
+          TARGET="${{ inputs.environment || github.ref_name }}"
+          if [ "$TARGET" = "main" ] || [ "$TARGET" = "production" ]; then
             echo "project_ref=${{ secrets.SUPABASE_PROJECT_REF_PROD }}" >> "$GITHUB_OUTPUT"
           else
             echo "project_ref=${{ secrets.SUPABASE_PROJECT_REF_DEV }}" >> "$GITHUB_OUTPUT"
