@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { useTheme } from "@/app/providers/ThemeProvider";
 import { useProfile } from "../hooks";
 
 function formatDate(dateString: string): string {
@@ -26,6 +27,7 @@ function formatDate(dateString: string): string {
 
 export function SettingsPage() {
   const { profile, isLoading, update } = useProfile();
+  const { theme, setTheme } = useTheme();
 
   if (isLoading) {
     return (
@@ -36,6 +38,7 @@ export function SettingsPage() {
   }
 
   function handleThemeChange(value: "light" | "dark" | "system") {
+    setTheme(value);
     update.mutate({ theme_preference: value });
   }
 
@@ -59,7 +62,7 @@ export function SettingsPage() {
           <div className="flex items-center justify-between">
             <Label htmlFor="theme-preference">Tema</Label>
             <Select
-              value={profile?.theme_preference ?? "system"}
+              value={theme}
               onValueChange={handleThemeChange}
             >
               <SelectTrigger id="theme-preference" className="w-[200px]">

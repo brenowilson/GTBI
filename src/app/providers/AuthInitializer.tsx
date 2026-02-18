@@ -2,6 +2,7 @@ import { useEffect, type ReactNode } from "react";
 import { supabase } from "@/shared/lib/supabase";
 import { useAuthStore } from "@/stores/auth.store";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTheme } from "./ThemeProvider";
 import type { UserRole } from "@/entities/user";
 
 /**
@@ -12,6 +13,7 @@ import type { UserRole } from "@/entities/user";
 export function AuthInitializer({ children }: { children: ReactNode }) {
   const { setUser, setRoles, setLoading, reset } = useAuthStore();
   const queryClient = useQueryClient();
+  const { setTheme } = useTheme();
 
   useEffect(() => {
     async function loadUserProfile(userId: string) {
@@ -24,6 +26,10 @@ export function AuthInitializer({ children }: { children: ReactNode }) {
 
         if (profile) {
           setUser(profile);
+
+          if (profile.theme_preference) {
+            setTheme(profile.theme_preference);
+          }
         }
 
         const { data: roles } = await supabase
