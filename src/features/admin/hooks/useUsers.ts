@@ -154,3 +154,65 @@ export function useReactivateUser() {
     },
   });
 }
+
+export function useRolePermissions() {
+  return useQuery({
+    queryKey: ["admin", "role-permissions"],
+    queryFn: () => userRepository.getRolePermissions(),
+  });
+}
+
+export function useFeatures() {
+  return useQuery({
+    queryKey: ["admin", "features"],
+    queryFn: () => userRepository.getFeatures(),
+  });
+}
+
+export function useCreateRole() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: (input: { name: string; description: string }) =>
+      userRepository.createRole(input.name, input.description),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "roles"] });
+      toast({ title: "Role criada", description: "A role foi criada com sucesso." });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Erro ao criar role", description: error.message, variant: "destructive" });
+    },
+  });
+}
+
+export function useDeleteRole() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: (roleId: string) => userRepository.deleteRole(roleId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "roles"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "role-permissions"] });
+      toast({ title: "Role removida", description: "A role foi removida com sucesso." });
+    },
+    onError: (error: Error) => {
+      toast({ title: "Erro ao remover role", description: error.message, variant: "destructive" });
+    },
+  });
+}
+
+export function useTogglePermission() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: { roleId: string; featureCode: string; action: string; granted: boolean }) =>
+      input.granted
+        ? userRepository.grantPermission(input.roleId, input.featureCode, input.action)
+        : userRepository.revokePermission(input.roleId, input.featureCode, input.action),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "role-permissions"] });
+    },
+  });
+}

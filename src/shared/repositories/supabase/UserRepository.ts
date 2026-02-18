@@ -1,6 +1,6 @@
 import { supabase } from "@/shared/lib/supabase";
 import { invokeFunction } from "@/shared/lib/api";
-import type { IUserRepository, UserFilters, UserRoleAssignment } from "../interfaces/IUserRepository";
+import type { IUserRepository, UserFilters, UserRoleAssignment, RolePermissionEntry, FeatureDefinition } from "../interfaces/IUserRepository";
 import type { UserProfile, UserWithRole, UserRole, CreateUserInput } from "@/entities/user";
 
 export class SupabaseUserRepository implements IUserRepository {
@@ -165,5 +165,92 @@ export class SupabaseUserRepository implements IUserRepository {
   async acceptInvite(token: string): Promise<void> {
     const { error } = await invokeFunction("auth-accept-invite", { token });
     if (error) throw new Error(error);
+  }
+
+  async createRole(name: string, description: string): Promise<UserRole> {
+    const { data, error } = await supabase
+      .from("roles")
+      .insert({ name, description, is_system: false })
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async deleteRole(roleId: string): Promise<void> {
+    const { error } = await supabase
+      .from("roles")
+      .delete()
+      .eq("id", roleId)
+      .eq("is_system", false);
+
+    if (error) throw new Error(error.message);
+  }
+
+  async getRolePermissions(): Promise<RolePermissionEntry[]> {
+    const { data, error } = await supabase
+      .from("role_permissions")
+      .select("role_id, feature_actions(action, features(code))");
+
+    if (error) throw new Error(error.message);
+
+    return (data ?? []).map((row: Record<string, unknown>) => {
+      const featureAction = row.feature_actions as Record<string, unknown>;
+      const feature = featureAction.features as Record<string, unknown>;
+      return {
+        role_id: row.role_id as string,
+        feature_code: feature.code as string,
+        action: featureAction.action as string,
+      };
+    });
+  }
+
+  async getFeatures(): Promise<FeatureDefinition[]> {
+    const { data, error } = await supabase
+      .from("features")
+      .select("code, name")
+      .order("code", { ascending: true });
+
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  }
+
+  async grantPermission(roleId: string, featureCode: string, action: string): Promise<void> {
+    // Find the feature_action_id
+    const { data: featureAction, error: faError } = await supabase
+      .from("feature_actions")
+      .select("id, features!inner(code)")
+      .eq("action", action)
+      .eq("features.code", featureCode)
+      .single();
+
+    if (faError) throw new Error(faError.message);
+
+    const { error } = await supabase
+      .from("role_permissions")
+      .insert({ role_id: roleId, feature_action_id: featureAction.id });
+
+    if (error) throw new Error(error.message);
+  }
+
+  async revokePermission(roleId: string, featureCode: string, action: string): Promise<void> {
+    // Find the feature_action_id
+    const { data: featureAction, error: faError } = await supabase
+      .from("feature_actions")
+      .select("id, features!inner(code)")
+      .eq("action", action)
+      .eq("features.code", featureCode)
+      .single();
+
+    if (faError) throw new Error(faError.message);
+
+    const { error } = await supabase
+      .from("role_permissions")
+      .delete()
+      .eq("role_id", roleId)
+      .eq("feature_action_id", featureAction.id);
+
+    if (error) throw new Error(error.message);
   }
 }

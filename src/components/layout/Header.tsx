@@ -91,7 +91,10 @@ export function Header() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="flex items-center gap-2">
+            <DropdownMenuItem
+              className="flex items-center gap-2"
+              onClick={() => navigate("/settings")}
+            >
               <User className="h-4 w-4" />
               Perfil
             </DropdownMenuItem>

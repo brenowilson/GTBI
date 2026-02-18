@@ -18,11 +18,15 @@ export function AuthInitializer({ children }: { children: ReactNode }) {
   useEffect(() => {
     async function loadUserProfile(userId: string) {
       try {
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from("user_profiles")
           .select("*")
           .eq("id", userId)
           .single();
+
+        if (profileError) {
+          console.error("[Auth] Failed to load user profile:", profileError.message);
+        }
 
         if (profile) {
           setUser(profile);
@@ -32,10 +36,14 @@ export function AuthInitializer({ children }: { children: ReactNode }) {
           }
         }
 
-        const { data: roles } = await supabase
+        const { data: roles, error: rolesError } = await supabase
           .from("user_roles")
           .select("roles(*)")
           .eq("user_id", userId);
+
+        if (rolesError) {
+          console.error("[Auth] Failed to load user roles:", rolesError.message);
+        }
 
         if (roles) {
           const parsedRoles = roles
@@ -47,12 +55,17 @@ export function AuthInitializer({ children }: { children: ReactNode }) {
         await queryClient.prefetchQuery({
           queryKey: ["permissions", userId],
           queryFn: async () => {
-            const { data } = await supabase.rpc("get_user_permissions", {
+            const { data, error } = await supabase.rpc("get_user_permissions", {
               p_user_id: userId,
             });
+            if (error) {
+              console.error("[Auth] Failed to load permissions:", error.message);
+            }
             return data ?? [];
           },
         });
+      } catch (err) {
+        console.error("[Auth] Unexpected error loading user profile:", err);
       } finally {
         setLoading(false);
       }
@@ -62,6 +75,7 @@ export function AuthInitializer({ children }: { children: ReactNode }) {
       if (session?.user) {
         loadUserProfile(session.user.id);
       } else {
+        console.warn("[Auth] No active session found");
         setLoading(false);
       }
     });

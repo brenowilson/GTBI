@@ -11,6 +11,17 @@ export interface UserRoleAssignment {
   role_id: string;
 }
 
+export interface RolePermissionEntry {
+  role_id: string;
+  feature_code: string;
+  action: string;
+}
+
+export interface FeatureDefinition {
+  code: string;
+  name: string;
+}
+
 export interface IUserRepository {
   getAll(filters?: UserFilters): Promise<UserProfile[]>;
   getById(id: string): Promise<UserProfile | null>;
@@ -24,4 +35,10 @@ export interface IUserRepository {
   removeRole(userId: string, roleId: string): Promise<void>;
   invite(data: CreateUserInput): Promise<void>;
   acceptInvite(token: string): Promise<void>;
+  createRole(name: string, description: string): Promise<UserRole>;
+  deleteRole(roleId: string): Promise<void>;
+  getRolePermissions(): Promise<RolePermissionEntry[]>;
+  getFeatures(): Promise<FeatureDefinition[]>;
+  grantPermission(roleId: string, featureCode: string, action: string): Promise<void>;
+  revokePermission(roleId: string, featureCode: string, action: string): Promise<void>;
 }

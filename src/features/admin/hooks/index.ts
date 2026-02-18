@@ -7,6 +7,11 @@ export {
   useUpdateUserRole,
   useDeactivateUser,
   useReactivateUser,
+  useRolePermissions,
+  useFeatures,
+  useCreateRole,
+  useDeleteRole,
+  useTogglePermission,
 } from "./useUsers";
 export { useAuditLogs } from "./useAuditLogs";
 export { useAdminNotifications, useSendNotification } from "./useAdminNotifications";
