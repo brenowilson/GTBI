@@ -8,8 +8,7 @@ export interface ApiResponse<T> {
 
 /**
  * Invokes a Supabase Edge Function using raw fetch to guarantee
- * the Authorization header is set correctly. The supabase.functions.invoke()
- * wrapper has a customFetch that can overwrite headers, causing 401s.
+ * correct Authorization header handling.
  */
 export async function invokeFunction<T>(
   functionName: string,
@@ -19,7 +18,7 @@ export async function invokeFunction<T>(
   const { data: { session } } = await supabase.auth.getSession();
 
   if (!session?.access_token) {
-    console.error(`[invokeFunction] No session token available for ${functionName}`);
+    console.error(`[api] ${functionName}: no session — user must re-login`);
     return { data: null, error: "Sessao expirada. Faca login novamente." };
   }
 
@@ -40,15 +39,30 @@ export async function invokeFunction<T>(
 
   try {
     const response = await fetch(url, fetchOptions);
-    const responseData = await response.json();
+
+    // Parse response — handle non-JSON gracefully
+    let responseData: unknown;
+    const contentType = response.headers.get("content-type") ?? "";
+    if (contentType.includes("application/json")) {
+      responseData = await response.json();
+    } else {
+      const text = await response.text();
+      console.error(`[api] ${functionName}: non-JSON response (${response.status}):`, text.slice(0, 500));
+      responseData = { error: text || `HTTP ${response.status}` };
+    }
 
     if (!response.ok) {
-      const errorMessage = responseData?.error?.message
-        ?? responseData?.error
-        ?? `HTTP ${response.status}`;
-      console.error(`[invokeFunction] ${method} ${functionName} failed:`, {
-        status: response.status,
+      const data = responseData as Record<string, unknown>;
+      const errorObj = data?.error as Record<string, unknown> | string | undefined;
+      const errorMessage = typeof errorObj === "object" && errorObj !== null
+        ? (errorObj.message as string) ?? JSON.stringify(errorObj)
+        : typeof errorObj === "string"
+          ? errorObj
+          : (data?.message as string) ?? (data?.msg as string) ?? `HTTP ${response.status}`;
+
+      console.error(`[api] ${functionName} ${method} ${response.status}:`, {
         error: errorMessage,
+        body: responseData,
       });
       return { data: null, error: errorMessage };
     }
@@ -56,7 +70,7 @@ export async function invokeFunction<T>(
     return { data: responseData as T, error: null };
   } catch (err) {
     const message = err instanceof Error ? err.message : "Network error";
-    console.error(`[invokeFunction] ${method} ${functionName} exception:`, message);
+    console.error(`[api] ${functionName} exception:`, message);
     return { data: null, error: message };
   }
 }

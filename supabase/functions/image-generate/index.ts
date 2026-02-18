@@ -2,7 +2,6 @@ import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import {
   withMiddleware,
   AuthContext,
-  requirePermission,
   requireRestaurantAccess,
   checkIdempotency,
 } from "../_shared/middleware.ts";
@@ -38,9 +37,6 @@ type ImageMode = (typeof VALID_MODES)[number];
 const handler = withMiddleware(
   async (req: Request, ctx: AuthContext | null): Promise<Response> => {
     const { userId, adminClient } = ctx!;
-
-    // Permission check
-    await requirePermission(adminClient, userId, "catalog", "update");
 
     // Idempotency check
     await checkIdempotency(adminClient, req);
@@ -289,6 +285,7 @@ const handler = withMiddleware(
       },
     }, 201);
   },
+  { permission: ["catalog", "update"] },
 );
 
 function buildPrompt(

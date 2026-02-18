@@ -3,7 +3,6 @@ import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import {
   withMiddleware,
   AuthContext,
-  requirePermission,
   requireRestaurantAccess,
   checkIdempotency,
 } from "../_shared/middleware.ts";
@@ -38,9 +37,6 @@ interface SnapshotData {
 const handler = withMiddleware(
   async (req: Request, ctx: AuthContext | null): Promise<Response> => {
     const { userId, adminClient } = ctx!;
-
-    // Permission check
-    await requirePermission(adminClient, userId, "reports", "create");
 
     // Idempotency check
     await checkIdempotency(adminClient, req);
@@ -245,6 +241,7 @@ const handler = withMiddleware(
       actions_count: actions.length,
     }, 201);
   },
+  { permission: ["reports", "create"] },
 );
 
 function calculateChange(current: number, previous: number): number {

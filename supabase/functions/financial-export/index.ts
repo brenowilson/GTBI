@@ -2,7 +2,6 @@ import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import {
   withMiddleware,
   AuthContext,
-  requirePermission,
   requireRestaurantAccess,
 } from "../_shared/middleware.ts";
 import { ValidationError, NotFoundError } from "../_shared/errors.ts";
@@ -25,9 +24,6 @@ import { logAudit, getClientIp } from "../_shared/audit.ts";
 const handler = withMiddleware(
   async (req: Request, ctx: AuthContext | null): Promise<Response> => {
     const { userId, adminClient } = ctx!;
-
-    // Permission check
-    await requirePermission(adminClient, userId, "financial", "read");
 
     // Parse and validate input
     const body = await req.json();
@@ -202,6 +198,7 @@ const handler = withMiddleware(
       },
     });
   },
+  { permission: ["financial", "read"] },
 );
 
 function escapeField(value: string, separator: string): string {

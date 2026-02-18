@@ -2,6 +2,7 @@ import { SupabaseClient, User } from "https://esm.sh/@supabase/supabase-js@2";
 import { getAdminClient, getUserClient } from "./supabase.ts";
 import { handleCorsPreFlight, corsHeaders } from "./cors.ts";
 import { UnauthorizedError, ForbiddenError, errorResponse, ConflictError } from "./errors.ts";
+import { createLogger } from "./logger.ts";
 
 export interface AuthContext {
   user: User;
@@ -194,6 +195,11 @@ export function withMiddleware(
   const allowedMethods = options.methods ?? ["POST"];
 
   return async (req: Request): Promise<Response> => {
+    // Extract function name from URL path for logging
+    const url = new URL(req.url);
+    const functionName = url.pathname.split("/").pop() ?? "unknown";
+    const log = createLogger(functionName);
+
     // Handle CORS preflight
     if (req.method === "OPTIONS") {
       return handleCorsPreFlight();
@@ -201,6 +207,7 @@ export function withMiddleware(
 
     // Validate HTTP method
     if (!allowedMethods.includes(req.method)) {
+      log.warn(`Method ${req.method} not allowed`, { allowedMethods });
       return new Response(
         JSON.stringify({
           error: {
@@ -219,20 +226,43 @@ export function withMiddleware(
       let ctx: AuthContext | null = null;
 
       if (!options.public) {
+        log.info("Authenticating user");
         ctx = await getAuthUser(req);
+        log.info("User authenticated", { userId: ctx.userId });
 
         if (options.permission) {
+          log.info("Checking permission", {
+            userId: ctx.userId,
+            feature: options.permission[0],
+            action: options.permission[1],
+          });
           await requirePermission(
             ctx.adminClient,
             ctx.userId,
             options.permission[0],
             options.permission[1],
           );
+          log.info("Permission granted", {
+            userId: ctx.userId,
+            feature: options.permission[0],
+            action: options.permission[1],
+          });
         }
+      } else {
+        log.info("Public endpoint — skipping auth");
       }
 
-      return await handler(req, ctx);
+      log.request(req.method, ctx?.userId);
+      const response = await handler(req, ctx);
+      log.response(response.status, ctx?.userId);
+      return response;
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      const errorName = error instanceof Error ? error.constructor.name : "Error";
+      log.error(`${errorName}: ${errorMessage}`, {
+        errorType: errorName,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
       return errorResponse(error);
     }
   };

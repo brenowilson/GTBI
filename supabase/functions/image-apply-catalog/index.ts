@@ -2,7 +2,6 @@ import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import {
   withMiddleware,
   AuthContext,
-  requirePermission,
   requireRestaurantAccess,
   checkIdempotency,
 } from "../_shared/middleware.ts";
@@ -21,9 +20,6 @@ import { logAudit, getClientIp } from "../_shared/audit.ts";
 const handler = withMiddleware(
   async (req: Request, ctx: AuthContext | null): Promise<Response> => {
     const { userId, adminClient } = ctx!;
-
-    // Permission check
-    await requirePermission(adminClient, userId, "catalog", "update");
 
     // Idempotency check
     await checkIdempotency(adminClient, req);
@@ -155,6 +151,7 @@ const handler = withMiddleware(
       },
     });
   },
+  { permission: ["catalog", "update"] },
 );
 
 serve(handler);
