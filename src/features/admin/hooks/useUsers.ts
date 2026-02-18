@@ -73,15 +73,15 @@ export function useUpdateUserRole() {
         queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
         queryClient.invalidateQueries({ queryKey: ["admin", "user-role-assignments"] });
         toast({
-          title: variables.action === "assign" ? "Papel atribuído" : "Papel removido",
+          title: variables.action === "assign" ? "Perfil atribuido" : "Perfil removido",
           description:
             variables.action === "assign"
-              ? "O papel foi atribuído ao usuário com sucesso."
-              : "O papel foi removido do usuário com sucesso.",
+              ? "O perfil foi atribuido ao usuario com sucesso."
+              : "O perfil foi removido do usuario com sucesso.",
         });
       } else {
         toast({
-          title: "Erro ao alterar papel",
+          title: "Erro ao alterar perfil",
           description: result.error.message,
           variant: "destructive",
         });
@@ -89,7 +89,7 @@ export function useUpdateUserRole() {
     },
     onError: (error: Error) => {
       toast({
-        title: "Erro ao alterar papel",
+        title: "Erro ao alterar perfil",
         description: error.message,
         variant: "destructive",
       });
@@ -178,10 +178,10 @@ export function useCreateRole() {
       userRepository.createRole(input.name, input.description),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "roles"] });
-      toast({ title: "Role criada", description: "A role foi criada com sucesso." });
+      toast({ title: "Perfil criado", description: "O perfil de acesso foi criado com sucesso." });
     },
     onError: (error: Error) => {
-      toast({ title: "Erro ao criar role", description: error.message, variant: "destructive" });
+      toast({ title: "Erro ao criar perfil", description: error.message, variant: "destructive" });
     },
   });
 }
@@ -195,10 +195,10 @@ export function useDeleteRole() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "roles"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "role-permissions"] });
-      toast({ title: "Role removida", description: "A role foi removida com sucesso." });
+      toast({ title: "Perfil removido", description: "O perfil de acesso foi removido com sucesso." });
     },
     onError: (error: Error) => {
-      toast({ title: "Erro ao remover role", description: error.message, variant: "destructive" });
+      toast({ title: "Erro ao remover perfil", description: error.message, variant: "destructive" });
     },
   });
 }

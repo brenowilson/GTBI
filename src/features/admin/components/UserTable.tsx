@@ -31,7 +31,7 @@ export function UserTable({ users, onEdit, onToggleStatus }: UserTableProps) {
         <TableRow>
           <TableHead>Nome</TableHead>
           <TableHead>Email</TableHead>
-          <TableHead>Papel</TableHead>
+          <TableHead>Perfil</TableHead>
           <TableHead>Status</TableHead>
           <TableHead className="text-right">Ações</TableHead>
         </TableRow>

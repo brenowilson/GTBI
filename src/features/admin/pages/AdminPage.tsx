@@ -241,7 +241,7 @@ export function AdminPage() {
         <TabsList className="flex-wrap">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="users">Usuários</TabsTrigger>
-          <TabsTrigger value="roles">Roles</TabsTrigger>
+          <TabsTrigger value="roles">Perfis de Acesso</TabsTrigger>
           <TabsTrigger value="accounts">Contas iFood</TabsTrigger>
           <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
           <TabsTrigger value="logs">Logs</TabsTrigger>
