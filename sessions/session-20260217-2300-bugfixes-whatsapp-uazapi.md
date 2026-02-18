@@ -35,8 +35,10 @@ Fix 9 critical bugs reported by user, integrate full WhatsApp instance managemen
 - src/features/admin/index.ts — Updated exports
 - src/features/catalog/pages/CatalogPage.tsx — Renamed Catalogo → Cardapio
 - src/features/onboarding/components/OnboardingOverlay.tsx — Renamed Catalogo → Cardapio
-- src/entities/ifood-account/model.ts — Changed schema from authorization_code to client credentials
-- src/shared/lib/api.ts — Fixed invokeFunction to not pass body: undefined
+- src/entities/ifood-account/model.ts — Simplified to name + merchant_id only (removed client_id/client_secret)
+- src/features/admin/components/ConnectIfoodAccountForm.tsx — Removed Client ID/Secret fields (app-level env vars)
+- supabase/functions/ifood-connect/index.ts — Reads IFOOD_CLIENT_ID/SECRET from env vars instead of request body
+- src/shared/lib/api.ts — Fixed invokeFunction: no body:undefined, explicit Authorization header to fix 401 race condition
 - src/shared/repositories/interfaces/IUserRepository.ts — Added UserRoleAssignment type
 - src/shared/repositories/interfaces/IIfoodAccountRepository.ts — Fixed collectData signature
 - src/shared/repositories/interfaces/index.ts — Updated exports
@@ -71,4 +73,4 @@ Fix 9 critical bugs reported by user, integrate full WhatsApp instance managemen
 - [x] No broken cross-references
 
 ## Conclusao
-Fixed all 9 user-reported bugs (admin-stats 401, edit user, notification composer, iFood connect, naming inconsistency, admin-setup.sql syntax, DEPLOY.md). Built complete WhatsApp instance management with Uazapi API integration including QR code authentication flow, auto-webhook configuration, disconnect detection banner, and proper instance token handling for message sending. Fixed critical iFood parameter mismatches that prevented sync/refresh from working. Fixed invite flow to fail properly on role assignment errors.
+Fixed all 9 user-reported bugs (admin-stats 401, edit user, notification composer, iFood connect, naming inconsistency, admin-setup.sql syntax, DEPLOY.md). Built complete WhatsApp instance management with Uazapi API integration including QR code authentication flow, auto-webhook configuration, disconnect detection banner, and proper instance token handling for message sending. Fixed critical iFood parameter mismatches that prevented sync/refresh from working. Fixed invite flow to fail properly on role assignment errors. Resolved persistent 401 errors on Edge Functions by explicitly passing Authorization header in invokeFunction() to avoid session loading race condition. Simplified iFood connect form to only require name + merchant_id (Client ID/Secret are app-level env vars).
