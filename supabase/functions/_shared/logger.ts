@@ -12,7 +12,7 @@ interface LogContext {
 function formatEntry(level: string, message: string, context: LogContext): string {
   const ts = new Date().toISOString();
   const base = { ts, level, fn: context.functionName, msg: message };
-  const { functionName, ...rest } = context;
+  const { functionName: _fn, ...rest } = context;
   return JSON.stringify({ ...base, ...rest });
 }
 
