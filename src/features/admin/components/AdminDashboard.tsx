@@ -35,7 +35,7 @@ export function AdminDashboard({ stats }: AdminDashboardProps) {
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">
-              {stats[item.key].toLocaleString("pt-BR")}
+              {(stats[item.key] ?? 0).toLocaleString("pt-BR")}
             </p>
           </CardContent>
         </Card>

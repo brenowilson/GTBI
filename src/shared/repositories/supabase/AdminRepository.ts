@@ -11,12 +11,25 @@ import type {
 
 export class SupabaseAdminRepository implements IAdminRepository {
   async getStats(): Promise<AdminStats> {
-    const { data, error } = await invokeFunction<AdminStats>("admin-stats", undefined, {
+    const { data, error } = await invokeFunction<{
+      stats: Record<string, number>;
+    }>("admin-stats", undefined, {
       method: "GET",
     });
 
     if (error) throw new Error(error);
-    return data!;
+
+    const s = data!.stats;
+    return {
+      totalUsers: s.total_users ?? 0,
+      activeUsers: s.active_users ?? 0,
+      totalRestaurants: s.total_restaurants ?? 0,
+      activeRestaurants: s.total_ifood_accounts ?? 0,
+      totalReports: s.total_reports ?? 0,
+      totalActions: s.recent_image_jobs ?? 0,
+      pendingImageJobs: s.recent_image_jobs ?? 0,
+      openTickets: s.open_tickets ?? 0,
+    };
   }
 
   async getNotifications(filters?: { status?: string; channel?: string }): Promise<AdminNotification[]> {
