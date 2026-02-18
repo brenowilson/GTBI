@@ -45,30 +45,38 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- Step 3: Storage policies for the reports bucket
+DO $$ BEGIN
+  CREATE POLICY "Authenticated users can read reports"
+    ON storage.objects FOR SELECT TO authenticated
+    USING (bucket_id = 'reports');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
--- Authenticated users can read reports they have access to
-CREATE POLICY IF NOT EXISTS "Authenticated users can read reports"
-  ON storage.objects FOR SELECT TO authenticated
-  USING (bucket_id = 'reports');
-
--- Service role has full access to manage reports (used by Edge Functions)
-CREATE POLICY IF NOT EXISTS "Service role can manage reports"
-  ON storage.objects FOR ALL TO service_role
-  USING (bucket_id = 'reports');
+DO $$ BEGIN
+  CREATE POLICY "Service role can manage reports"
+    ON storage.objects FOR ALL TO service_role
+    USING (bucket_id = 'reports');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Step 4: Storage policies for the evidences bucket
+DO $$ BEGIN
+  CREATE POLICY "Authenticated users can read evidences"
+    ON storage.objects FOR SELECT TO authenticated
+    USING (bucket_id = 'evidences');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
--- Authenticated users can read evidence files
-CREATE POLICY IF NOT EXISTS "Authenticated users can read evidences"
-  ON storage.objects FOR SELECT TO authenticated
-  USING (bucket_id = 'evidences');
+DO $$ BEGIN
+  CREATE POLICY "Authenticated users can upload evidences"
+    ON storage.objects FOR INSERT TO authenticated
+    WITH CHECK (bucket_id = 'evidences');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
--- Authenticated users can upload evidence files
-CREATE POLICY IF NOT EXISTS "Authenticated users can upload evidences"
-  ON storage.objects FOR INSERT TO authenticated
-  WITH CHECK (bucket_id = 'evidences');
-
--- Service role has full access to manage evidences
-CREATE POLICY IF NOT EXISTS "Service role can manage evidences"
-  ON storage.objects FOR ALL TO service_role
-  USING (bucket_id = 'evidences');
+DO $$ BEGIN
+  CREATE POLICY "Service role can manage evidences"
+    ON storage.objects FOR ALL TO service_role
+    USING (bucket_id = 'evidences');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;

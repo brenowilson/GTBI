@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,24 +23,51 @@ interface UserOption {
   name: string;
 }
 
+type AudienceFilter = "system_users" | "clients" | "all";
+
 interface NotificationComposerProps {
   users: UserOption[];
+  clients: UserOption[];
   onSend: (data: {
     title: string;
     body: string;
-    channel: "email" | "whatsapp";
+    channels: ("email" | "whatsapp")[];
     recipientIds: string[];
   }) => void;
 }
 
 export function NotificationComposer({
   users,
+  clients,
   onSend,
 }: NotificationComposerProps) {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [channel, setChannel] = useState<"email" | "whatsapp">("email");
+  const [emailChannel, setEmailChannel] = useState(true);
+  const [whatsappChannel, setWhatsappChannel] = useState(false);
+  const [audienceFilter, setAudienceFilter] =
+    useState<AudienceFilter>("system_users");
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+
+  const visibleRecipients = useMemo(() => {
+    switch (audienceFilter) {
+      case "system_users":
+        return users;
+      case "clients":
+        return clients;
+      case "all":
+        return [...users, ...clients];
+    }
+  }, [audienceFilter, users, clients]);
+
+  const allVisibleSelected =
+    visibleRecipients.length > 0 &&
+    visibleRecipients.every((r) => selectedUserIds.includes(r.id));
+
+  function handleAudienceChange(value: AudienceFilter) {
+    setAudienceFilter(value);
+    setSelectedUserIds([]);
+  }
 
   function handleToggleUser(userId: string, checked: boolean) {
     setSelectedUserIds((prev) =>
@@ -48,9 +75,23 @@ export function NotificationComposer({
     );
   }
 
+  function handleToggleAll(checked: boolean) {
+    if (checked) {
+      setSelectedUserIds(visibleRecipients.map((r) => r.id));
+    } else {
+      setSelectedUserIds([]);
+    }
+  }
+
+  const selectedChannels: ("email" | "whatsapp")[] = [
+    ...(emailChannel ? (["email"] as const) : []),
+    ...(whatsappChannel ? (["whatsapp"] as const) : []),
+  ];
+
   const isValid =
     title.trim().length > 0 &&
     body.trim().length > 0 &&
+    selectedChannels.length > 0 &&
     selectedUserIds.length > 0;
 
   function handleSend() {
@@ -58,7 +99,7 @@ export function NotificationComposer({
       onSend({
         title,
         body,
-        channel,
+        channels: selectedChannels,
         recipientIds: selectedUserIds,
       });
       setTitle("");
@@ -95,38 +136,103 @@ export function NotificationComposer({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="notification-channel">Canal</Label>
-          <Select
-            value={channel}
-            onValueChange={(value) => setChannel(value as "email" | "whatsapp")}
-          >
-            <SelectTrigger id="notification-channel">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="email">Email</SelectItem>
-              <SelectItem value="whatsapp">WhatsApp</SelectItem>
-            </SelectContent>
-          </Select>
+          <Label>Canais</Label>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="channel-email"
+                checked={emailChannel}
+                onCheckedChange={(checked) => setEmailChannel(checked === true)}
+              />
+              <Label htmlFor="channel-email" className="cursor-pointer text-sm">
+                Email
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="channel-whatsapp"
+                checked={whatsappChannel}
+                onCheckedChange={(checked) =>
+                  setWhatsappChannel(checked === true)
+                }
+              />
+              <Label
+                htmlFor="channel-whatsapp"
+                className="cursor-pointer text-sm"
+              >
+                WhatsApp
+              </Label>
+            </div>
+          </div>
+          {selectedChannels.length === 0 && (
+            <p className="text-sm text-destructive">
+              Selecione ao menos um canal.
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
           <Label>Destinatários</Label>
+          <Select
+            value={audienceFilter}
+            onValueChange={(value) =>
+              handleAudienceChange(value as AudienceFilter)
+            }
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="system_users">
+                Usuários do Sistema
+              </SelectItem>
+              <SelectItem value="clients">
+                Clientes (Restaurantes)
+              </SelectItem>
+              <SelectItem value="all">Todos</SelectItem>
+            </SelectContent>
+          </Select>
+
           <div className="max-h-40 space-y-2 overflow-y-auto rounded-lg border p-3">
-            {users.map((user) => (
-              <div key={user.id} className="flex items-center space-x-2">
+            {visibleRecipients.length > 0 && (
+              <div className="flex items-center space-x-2 border-b pb-2">
                 <Checkbox
-                  id={`recipient-${user.id}`}
-                  checked={selectedUserIds.includes(user.id)}
+                  id="select-all"
+                  checked={allVisibleSelected}
                   onCheckedChange={(checked) =>
-                    handleToggleUser(user.id, checked === true)
+                    handleToggleAll(checked === true)
                   }
                 />
                 <Label
-                  htmlFor={`recipient-${user.id}`}
+                  htmlFor="select-all"
+                  className="cursor-pointer text-sm font-medium"
+                >
+                  Selecionar todos
+                </Label>
+              </div>
+            )}
+            {visibleRecipients.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                Nenhum destinatário disponível.
+              </p>
+            )}
+            {visibleRecipients.map((recipient) => (
+              <div
+                key={recipient.id}
+                className="flex items-center space-x-2"
+              >
+                <Checkbox
+                  id={`recipient-${recipient.id}`}
+                  checked={selectedUserIds.includes(recipient.id)}
+                  onCheckedChange={(checked) =>
+                    handleToggleUser(recipient.id, checked === true)
+                  }
+                />
+                <Label
+                  htmlFor={`recipient-${recipient.id}`}
                   className="cursor-pointer text-sm"
                 >
-                  {user.name}
+                  {recipient.name}
                 </Label>
               </div>
             ))}

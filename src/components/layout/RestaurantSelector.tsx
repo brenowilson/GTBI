@@ -32,7 +32,7 @@ export function RestaurantSelector() {
       <div className="flex items-center gap-2">
         <span className="text-sm text-muted-foreground">
           Nenhuma conta iFood conectada.{" "}
-          <Link to="/admin" className="text-primary underline underline-offset-4 hover:text-primary/80">
+          <Link to="/admin?tab=accounts" className="text-primary underline underline-offset-4 hover:text-primary/80">
             Conectar conta
           </Link>
         </span>

@@ -1,40 +1,75 @@
+import { useState, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AdminDashboard } from "../components/AdminDashboard";
 import { UserTable } from "../components/UserTable";
+import { EditUserDialog } from "../components/EditUserDialog";
 import { InviteUserForm } from "../components/InviteUserForm";
 import { RoleMatrix } from "../components/RoleMatrix";
 import { IfoodAccountCard } from "../components/IfoodAccountCard";
+import { ConnectIfoodAccountForm } from "../components/ConnectIfoodAccountForm";
 import { AuditLogTable } from "../components/AuditLogTable";
 import { NotificationComposer } from "../components/NotificationComposer";
 import {
   useAdminStats,
   useUsers,
   useUserRoles,
+  useUserRoleAssignments,
   useInviteUser,
+  useUpdateUserRole,
   useDeactivateUser,
   useReactivateUser,
   useAuditLogs,
   useSendNotification,
   useIfoodAccounts,
+  useConnectIfoodAccount,
   useSyncIfoodRestaurants,
   useDeactivateIfoodAccount,
 } from "../hooks";
 import type { SendNotificationInput } from "@/shared/repositories/interfaces";
 
 export function AdminPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") ?? "dashboard";
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
+
+  function handleTabChange(value: string) {
+    setSearchParams({ tab: value }, { replace: true });
+  }
   const { data: stats, isLoading: statsLoading, error: statsError, refetch: refetchStats } = useAdminStats();
   const { data: users, isLoading: usersLoading } = useUsers();
   const { data: roles, isLoading: rolesLoading } = useUserRoles();
+  const { data: roleAssignments } = useUserRoleAssignments();
   const { data: auditLogs, isLoading: logsLoading } = useAuditLogs();
   const { data: accounts, isLoading: accountsLoading } = useIfoodAccounts();
 
   const inviteUser = useInviteUser();
+  const updateUserRole = useUpdateUserRole();
   const deactivateUser = useDeactivateUser();
   const reactivateUser = useReactivateUser();
   const sendNotification = useSendNotification();
+  const connectIfoodAccount = useConnectIfoodAccount();
   const syncRestaurants = useSyncIfoodRestaurants();
   const deactivateAccount = useDeactivateIfoodAccount();
+
+  // Build a map from userId -> roleId for fast lookup
+  const userRoleMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const assignment of roleAssignments ?? []) {
+      map.set(assignment.user_id, assignment.role_id);
+    }
+    return map;
+  }, [roleAssignments]);
+
+  // Build a map from roleId -> roleName for display
+  const roleNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const role of roles ?? []) {
+      map.set(role.id, role.name);
+    }
+    return map;
+  }, [roles]);
 
   function handleInvite(data: { email: string; fullName: string; roleId: string }) {
     inviteUser.mutate({
@@ -54,19 +89,68 @@ export function AdminPage() {
     }
   }
 
+  function handleEditUserSave(data: {
+    userId: string;
+    roleId: string | null;
+    isActive: boolean;
+    previousRoleId: string | null;
+  }) {
+    const user = users?.find((u) => u.id === data.userId);
+    if (!user) return;
+
+    // Handle active status change
+    if (data.isActive !== user.is_active) {
+      if (data.isActive) {
+        reactivateUser.mutate(data.userId);
+      } else {
+        deactivateUser.mutate(data.userId);
+      }
+    }
+
+    // Handle role change
+    const roleChanged = data.roleId !== data.previousRoleId;
+    if (roleChanged) {
+      // Remove old role if one existed
+      if (data.previousRoleId) {
+        updateUserRole.mutate({
+          userId: data.userId,
+          roleId: data.previousRoleId,
+          action: "remove",
+        });
+      }
+      // Assign new role if one was selected
+      if (data.roleId) {
+        updateUserRole.mutate({
+          userId: data.userId,
+          roleId: data.roleId,
+          action: "assign",
+        });
+      }
+    }
+
+    setEditingUserId(null);
+  }
+
   function handleSendNotification(data: {
     title: string;
     body: string;
-    channel: "email" | "whatsapp";
+    channels: ("email" | "whatsapp")[];
     recipientIds: string[];
   }) {
-    const input: SendNotificationInput = {
-      title: data.title,
-      body: data.body,
-      channel: data.channel,
-      recipientUserId: data.recipientIds[0],
-    };
-    sendNotification.mutate(input);
+    // Send a notification for each recipient and each channel.
+    // For WhatsApp, the Edge Function should enforce a 15-second delay
+    // between messages to comply with rate limits.
+    for (const recipientId of data.recipientIds) {
+      for (const channel of data.channels) {
+        const input: SendNotificationInput = {
+          title: data.title,
+          body: data.body,
+          channel,
+          recipientUserId: recipientId,
+        };
+        sendNotification.mutate(input);
+      }
+    }
   }
 
   function handleSyncAccount(accountId: string) {
@@ -78,13 +162,31 @@ export function AdminPage() {
   }
 
   // Map users from API (snake_case) to UserTable component (camelCase)
-  const mappedUsers = (users ?? []).map((u) => ({
-    id: u.id,
-    fullName: u.full_name,
-    email: u.email,
-    role: "—",
-    isActive: u.is_active,
-  }));
+  const mappedUsers = (users ?? []).map((u) => {
+    const roleId = userRoleMap.get(u.id);
+    const roleName = roleId ? roleNameMap.get(roleId) : undefined;
+    return {
+      id: u.id,
+      fullName: u.full_name,
+      email: u.email,
+      role: roleName ?? "—",
+      isActive: u.is_active,
+    };
+  });
+
+  // Build editing user data for the dialog
+  const editingUser = useMemo(() => {
+    if (!editingUserId) return null;
+    const user = users?.find((u) => u.id === editingUserId);
+    if (!user) return null;
+    return {
+      id: user.id,
+      fullName: user.full_name,
+      email: user.email,
+      isActive: user.is_active,
+      roleId: userRoleMap.get(user.id) ?? null,
+    };
+  }, [editingUserId, users, userRoleMap]);
 
   // Derive notification user list from users data
   const notificationUsers = (users ?? []).map((u) => ({
@@ -117,13 +219,15 @@ export function AdminPage() {
     timestamp: log.created_at,
   }));
 
-  // Build features/permissions for RoleMatrix
+  // Build features/permissions for RoleMatrix — matches DB feature_groups
   const features = [
-    { id: "feat-1", name: "Relatórios" },
-    { id: "feat-2", name: "Avaliações" },
-    { id: "feat-3", name: "Chamados" },
-    { id: "feat-4", name: "Financeiro" },
-    { id: "feat-5", name: "Catálogo" },
+    { id: "feat-users", name: "Usuários / Admin" },
+    { id: "feat-restaurants", name: "Restaurantes / Performance" },
+    { id: "feat-reports", name: "Relatórios" },
+    { id: "feat-reviews", name: "Avaliações" },
+    { id: "feat-tickets", name: "Chamados" },
+    { id: "feat-financial", name: "Financeiro" },
+    { id: "feat-catalog", name: "Cardápio" },
   ];
 
   const isInitialLoading = usersLoading && rolesLoading;
@@ -145,7 +249,7 @@ export function AdminPage() {
         </p>
       </div>
 
-      <Tabs defaultValue="dashboard">
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList className="flex-wrap">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="users">Usuários</TabsTrigger>
@@ -183,6 +287,7 @@ export function AdminPage() {
           ) : (
             <UserTable
               users={mappedUsers}
+              onEdit={setEditingUserId}
               onToggleStatus={handleToggleUserStatus}
             />
           )}
@@ -203,6 +308,10 @@ export function AdminPage() {
         </TabsContent>
 
         <TabsContent value="accounts" className="space-y-4">
+          <ConnectIfoodAccountForm
+            onConnect={(data) => connectIfoodAccount.mutate(data)}
+            isLoading={connectIfoodAccount.isPending}
+          />
           {accountsLoading ? (
             <div className="flex items-center justify-center py-12">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -238,10 +347,22 @@ export function AdminPage() {
         <TabsContent value="notifications" className="space-y-4">
           <NotificationComposer
             users={notificationUsers}
+            clients={[]}
             onSend={handleSendNotification}
           />
         </TabsContent>
       </Tabs>
+
+      <EditUserDialog
+        open={editingUserId !== null}
+        onOpenChange={(open) => {
+          if (!open) setEditingUserId(null);
+        }}
+        user={editingUser}
+        roles={roleOptions}
+        onSave={handleEditUserSave}
+        isSaving={updateUserRole.isPending || deactivateUser.isPending || reactivateUser.isPending}
+      />
     </div>
   );
 }

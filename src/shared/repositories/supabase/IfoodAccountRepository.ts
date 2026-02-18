@@ -42,13 +42,18 @@ export class SupabaseIfoodAccountRepository implements IIfoodAccountRepository {
   }
 
   async connect(input: ConnectIfoodAccountInput): Promise<IfoodAccount> {
-    const { data, error } = await invokeFunction<IfoodAccount>("ifood-connect", {
-      authorization_code: input.authorization_code,
-      authorization_code_verifier: input.authorization_code_verifier,
-    });
+    const { data, error } = await invokeFunction<{ success: boolean; account: IfoodAccount }>(
+      "ifood-connect",
+      {
+        name: input.name,
+        merchant_id: input.merchant_id,
+        client_id: input.client_id,
+        client_secret: input.client_secret,
+      },
+    );
 
     if (error) throw new Error(error);
-    return data!;
+    return data!.account;
   }
 
   async refreshToken(accountId: string): Promise<void> {

@@ -10,11 +10,12 @@ export async function invokeFunction<T>(
   body?: Record<string, unknown>,
   options?: { method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE"; headers?: Record<string, string> },
 ): Promise<ApiResponse<T>> {
-  const { data, error } = await supabase.functions.invoke(functionName, {
-    body,
-    method: options?.method,
-    headers: options?.headers,
-  });
+  const invokeOptions: Record<string, unknown> = {};
+  if (body !== undefined) invokeOptions.body = body;
+  if (options?.method) invokeOptions.method = options.method;
+  if (options?.headers) invokeOptions.headers = options.headers;
+
+  const { data, error } = await supabase.functions.invoke(functionName, invokeOptions);
 
   if (error) {
     return { data: null, error: error.message };

@@ -24,7 +24,7 @@ export function CatalogPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Catálogo</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Cardápio</h1>
           <p className="text-muted-foreground">
             Gerencie os produtos e imagens do cardápio do restaurante.
           </p>
@@ -56,7 +56,7 @@ export function CatalogPage() {
   if (error) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4">
-        <p className="text-muted-foreground">Erro ao carregar catálogo.</p>
+        <p className="text-muted-foreground">Erro ao carregar cardápio.</p>
         <Button variant="outline" onClick={() => refetch()}>
           Tentar novamente
         </Button>
@@ -67,7 +67,7 @@ export function CatalogPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Catálogo</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Cardápio</h1>
         <p className="text-muted-foreground">
           Gerencie os produtos e imagens do cardápio do restaurante.
         </p>

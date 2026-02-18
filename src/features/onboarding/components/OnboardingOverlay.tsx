@@ -58,7 +58,7 @@ const STEPS: OnboardingStep[] = [
       "Avaliações — Acompanhe o feedback dos clientes",
       "Chamados — Gerencie solicitações e problemas",
       "Financeiro — Controle receitas e despesas",
-      "Catálogo — Gerencie produtos e cardápio",
+      "Cardápio — Gerencie produtos e imagens",
     ],
     buttonLabel: "Próximo",
   },

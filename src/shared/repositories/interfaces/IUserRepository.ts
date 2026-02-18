@@ -6,6 +6,11 @@ export interface UserFilters {
   search?: string;
 }
 
+export interface UserRoleAssignment {
+  user_id: string;
+  role_id: string;
+}
+
 export interface IUserRepository {
   getAll(filters?: UserFilters): Promise<UserProfile[]>;
   getById(id: string): Promise<UserProfile | null>;
@@ -14,6 +19,7 @@ export interface IUserRepository {
   deactivate(id: string): Promise<void>;
   reactivate(id: string): Promise<void>;
   getRoles(): Promise<UserRole[]>;
+  getRoleAssignments(): Promise<UserRoleAssignment[]>;
   assignRole(userId: string, roleId: string): Promise<void>;
   removeRole(userId: string, roleId: string): Promise<void>;
   invite(data: CreateUserInput): Promise<void>;

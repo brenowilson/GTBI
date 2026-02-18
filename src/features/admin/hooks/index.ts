@@ -2,6 +2,7 @@ export { useAdminStats } from "./useAdminStats";
 export {
   useUsers,
   useUserRoles,
+  useUserRoleAssignments,
   useInviteUser,
   useUpdateUserRole,
   useDeactivateUser,

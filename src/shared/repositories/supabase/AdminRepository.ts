@@ -11,7 +11,9 @@ import type {
 
 export class SupabaseAdminRepository implements IAdminRepository {
   async getStats(): Promise<AdminStats> {
-    const { data, error } = await invokeFunction<AdminStats>("admin-stats");
+    const { data, error } = await invokeFunction<AdminStats>("admin-stats", undefined, {
+      method: "GET",
+    });
 
     if (error) throw new Error(error);
     return data!;

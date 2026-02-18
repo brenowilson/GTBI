@@ -1,6 +1,6 @@
 import { supabase } from "@/shared/lib/supabase";
 import { invokeFunction } from "@/shared/lib/api";
-import type { IUserRepository, UserFilters } from "../interfaces/IUserRepository";
+import type { IUserRepository, UserFilters, UserRoleAssignment } from "../interfaces/IUserRepository";
 import type { UserProfile, UserWithRole, UserRole, CreateUserInput } from "@/entities/user";
 
 export class SupabaseUserRepository implements IUserRepository {
@@ -120,6 +120,15 @@ export class SupabaseUserRepository implements IUserRepository {
       .from("roles")
       .select("*")
       .order("name", { ascending: true });
+
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  }
+
+  async getRoleAssignments(): Promise<UserRoleAssignment[]> {
+    const { data, error } = await supabase
+      .from("user_roles")
+      .select("user_id, role_id");
 
     if (error) throw new Error(error.message);
     return data ?? [];

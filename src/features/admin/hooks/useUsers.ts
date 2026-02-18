@@ -23,6 +23,13 @@ export function useUserRoles() {
   });
 }
 
+export function useUserRoleAssignments() {
+  return useQuery({
+    queryKey: ["admin", "user-role-assignments"],
+    queryFn: () => userRepository.getRoleAssignments(),
+  });
+}
+
 export function useInviteUser() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -64,6 +71,7 @@ export function useUpdateUserRole() {
     onSuccess: (result, variables) => {
       if (result.success) {
         queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+        queryClient.invalidateQueries({ queryKey: ["admin", "user-role-assignments"] });
         toast({
           title: variables.action === "assign" ? "Papel atribuído" : "Papel removido",
           description:
