@@ -6,6 +6,7 @@ export function useWhatsAppInstances() {
   return useQuery({
     queryKey: ["admin", "whatsapp-instances"],
     queryFn: () => whatsappInstanceRepository.getAll(),
+    refetchInterval: 60_000, // Poll every 60s to detect disconnections
   });
 }
 

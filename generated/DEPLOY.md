@@ -8,13 +8,13 @@ Guia completo de todos os passos manuais necessarios apos o deploy do GTBI.
 
 Antes de iniciar, confirme que voce tem:
 
-- [ ] Repositorio GitHub criado e com o codigo do GTBI
-- [ ] Projeto Supabase criado (regiao: **sa-east-1** — Sao Paulo)
-- [ ] Projeto Vercel criado e conectado ao repositorio GitHub
-- [ ] Conta no portal de desenvolvedores iFood (https://developer.ifood.com.br)
-- [ ] Conta Resend (https://resend.com)
-- [ ] Chave de API OpenAI com acesso a `gpt-4` e `gpt-image-1`
-- [ ] Servidor Uazapi configurado para WhatsApp
+- [x] Repositorio GitHub criado e com o codigo do GTBI
+- [x] Projeto Supabase criado (regiao: **sa-east-1** — Sao Paulo)
+- [x] Projeto Vercel criado e conectado ao repositorio GitHub
+- [x] Conta no portal de desenvolvedores iFood (https://developer.ifood.com.br)
+- [x] Conta Resend (https://resend.com)
+- [x] Chave de API OpenAI com acesso a `gpt-4` e `gpt-image-1`
+- [x] Servidor Uazapi configurado para WhatsApp
 
 ---
 
@@ -125,7 +125,7 @@ O deploy do frontend e automatico:
    - Marque **Auto Confirm User**
 4. Clique em **Create User**
 
-> **IMPORTANTE**: O trigger `handle_new_user` cria automaticamente o perfil na tabela `profiles`. Aguarde alguns segundos antes do proximo passo.
+> **IMPORTANTE**: O trigger `handle_new_user` cria automaticamente o perfil na tabela `user_profiles`. Aguarde alguns segundos antes do proximo passo.
 
 ### 3.2 Executar script admin-setup.sql
 
@@ -325,7 +325,7 @@ curl -i https://<PROJECT_REF>.supabase.co/functions/v1/admin-stats \
   -H "Authorization: Bearer <ACCESS_TOKEN>"
 ```
 
-Lista das 15 Edge Functions que devem estar deployed:
+Lista das 16 Edge Functions que devem estar deployed:
 - `auth-invite`
 - `auth-accept-invite`
 - `ifood-connect`
@@ -341,6 +341,7 @@ Lista das 15 Edge Functions que devem estar deployed:
 - `financial-export`
 - `admin-stats`
 - `admin-send-notification`
+- `whatsapp-instance`
 
 Verifique no **Supabase Dashboard > Edge Functions** que todas estao listadas e com status ativo.
 
