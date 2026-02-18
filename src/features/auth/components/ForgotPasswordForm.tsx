@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Logo } from "@/components/common";
 import { useAuth } from "../hooks/useAuth";
 import { forgotPasswordSchema, type ForgotPasswordInput } from "../types";
 
@@ -23,6 +24,9 @@ export function ForgotPasswordForm() {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader className="text-center">
+        <div className="mb-4 flex justify-center">
+          <Logo size="lg" />
+        </div>
         <CardTitle className="text-h2">Recuperar senha</CardTitle>
         <CardDescription>
           Informe seu email para receber um link de recuperação.

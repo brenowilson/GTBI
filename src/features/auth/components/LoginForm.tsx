@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Logo } from "@/components/common";
 import { useAuth } from "../hooks/useAuth";
 import { loginSchema, type LoginInput } from "../types";
 
@@ -23,7 +24,9 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader className="text-center">
-        <img src="/favicon.svg" alt="GTBI" className="mx-auto mb-4 h-12 w-12" />
+        <div className="mb-4 flex justify-center">
+          <Logo size="lg" />
+        </div>
         <CardTitle className="text-h2">Entrar no GTBI</CardTitle>
       </CardHeader>
       <CardContent>

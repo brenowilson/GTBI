@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Logo } from "@/components/common";
 
 const NAV_ITEMS = [
   { to: "/performance", label: "Performance", icon: BarChart3 },
@@ -28,9 +29,8 @@ const NAV_ITEMS = [
 export function Sidebar() {
   return (
     <aside className="hidden md:flex md:w-60 md:flex-col md:border-r md:border-sidebar-border md:bg-sidebar">
-      <div className="flex h-16 items-center gap-2 border-b border-sidebar-border px-6">
-        <img src="/favicon.svg" alt="GTBI" className="h-8 w-8" />
-        <span className="text-lg font-bold text-sidebar-foreground">GTBI</span>
+      <div className="flex h-16 items-center border-b border-sidebar-border px-6">
+        <Logo size="sm" />
       </div>
       <ScrollArea className="flex-1 py-4">
         <nav className="space-y-1 px-3">
