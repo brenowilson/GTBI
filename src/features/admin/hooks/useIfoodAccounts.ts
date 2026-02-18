@@ -89,8 +89,8 @@ export function useCollectIfoodData() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: (accountId: string) =>
-      ifoodAccountRepository.collectData(accountId),
+    mutationFn: (input: { restaurantId: string; weekStart: string; weekEnd: string }) =>
+      ifoodAccountRepository.collectData(input.restaurantId, input.weekStart, input.weekEnd),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "ifood-accounts"] });
       toast({

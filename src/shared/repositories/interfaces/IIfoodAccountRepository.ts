@@ -11,7 +11,7 @@ export interface IIfoodAccountRepository {
   connect(data: ConnectIfoodAccountInput): Promise<IfoodAccount>;
   refreshToken(accountId: string): Promise<void>;
   syncRestaurants(accountId: string): Promise<void>;
-  collectData(accountId: string): Promise<void>;
+  collectData(restaurantId: string, weekStart: string, weekEnd: string): Promise<void>;
   grantAccess(accountId: string, userId: string): Promise<IfoodAccountAccess>;
   revokeAccess(accountId: string, userId: string): Promise<void>;
   deactivate(id: string): Promise<void>;

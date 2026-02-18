@@ -58,7 +58,7 @@ export class SupabaseIfoodAccountRepository implements IIfoodAccountRepository {
 
   async refreshToken(accountId: string): Promise<void> {
     const { error } = await invokeFunction("ifood-refresh-token", {
-      account_id: accountId,
+      ifood_account_id: accountId,
     });
 
     if (error) throw new Error(error);
@@ -66,15 +66,17 @@ export class SupabaseIfoodAccountRepository implements IIfoodAccountRepository {
 
   async syncRestaurants(accountId: string): Promise<void> {
     const { error } = await invokeFunction("ifood-sync-restaurants", {
-      account_id: accountId,
+      ifood_account_id: accountId,
     });
 
     if (error) throw new Error(error);
   }
 
-  async collectData(accountId: string): Promise<void> {
+  async collectData(restaurantId: string, weekStart: string, weekEnd: string): Promise<void> {
     const { error } = await invokeFunction("ifood-collect-data", {
-      account_id: accountId,
+      restaurant_id: restaurantId,
+      week_start: weekStart,
+      week_end: weekEnd,
     });
 
     if (error) throw new Error(error);

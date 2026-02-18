@@ -9,7 +9,7 @@ import {
 import { jsonResponse, ValidationError, NotFoundError } from "../_shared/errors.ts";
 import { logAudit, getClientIp } from "../_shared/audit.ts";
 import { sendEmail, buildEmailHtml } from "../_shared/resend.ts";
-import { sendWhatsAppMessage, sendWhatsAppFile } from "../_shared/uazapi.ts";
+import { sendWhatsAppMessage, sendWhatsAppFile, getActiveInstanceToken } from "../_shared/uazapi.ts";
 
 /**
  * POST /report-send
@@ -171,11 +171,13 @@ const handler = withMiddleware(
       // WhatsApp
       if (channels.includes("whatsapp") && recipient.phone) {
         try {
+          const instanceToken = await getActiveInstanceToken(adminClient);
+
           // Send text summary first
           await sendWhatsAppMessage({
             phone: recipient.phone,
             message: `*GTBI - Relatorio Semanal*\n\n${restaurantName}\nPeriodo: ${report.week_start} a ${report.week_end}\n\nSeu relatorio semanal esta pronto!`,
-          });
+          }, instanceToken);
 
           // Send file if available
           if (report.pdf_url) {
@@ -183,8 +185,8 @@ const handler = withMiddleware(
               phone: recipient.phone,
               fileUrl: report.pdf_url,
               caption: `Relatorio ${restaurantName} - ${report.week_start}`,
-              fileName: `relatorio-${report.week_start}.html`,
-            });
+              fileName: `relatorio-${report.week_start}.pdf`,
+            }, instanceToken);
           }
 
           await adminClient.from("report_send_logs").insert({

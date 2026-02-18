@@ -8,7 +8,7 @@ import { jsonResponse, ValidationError } from "../_shared/errors.ts";
 import { logAudit, getClientIp } from "../_shared/audit.ts";
 import { checkRateLimit } from "../_shared/rate-limit.ts";
 import { sendEmail, buildEmailHtml } from "../_shared/resend.ts";
-import { sendWhatsAppMessage } from "../_shared/uazapi.ts";
+import { sendWhatsAppMessage, getActiveInstanceToken } from "../_shared/uazapi.ts";
 
 /**
  * POST /admin-send-notification
@@ -123,10 +123,11 @@ const handler = withMiddleware(
               errorMessage =
                 "Phone number not provided. Include recipient_phones map with user_id -> phone.";
             } else {
+              const instanceToken = await getActiveInstanceToken(adminClient);
               await sendWhatsAppMessage({
                 phone,
                 message: `*GTBI - ${title}*\n\n${notificationBody}`,
-              });
+              }, instanceToken);
               status = "sent";
             }
           }

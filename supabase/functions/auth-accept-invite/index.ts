@@ -87,7 +87,9 @@ const handler = withMiddleware(
 
     if (roleError) {
       console.error("Failed to assign role:", roleError.message);
-      // Don't fail the whole operation — user is created, role can be assigned manually
+      // Delete the created user since the operation is incomplete
+      await adminClient.auth.admin.deleteUser(newUserId);
+      throw new Error(`Failed to assign role: ${roleError.message}`);
     }
 
     // Mark invitation as accepted
@@ -99,12 +101,6 @@ const handler = withMiddleware(
     if (updateError) {
       console.error("Failed to update invitation:", updateError.message);
     }
-
-    // Sign in the new user to get a session
-    const { data: _signInData, error: _signInError } = await adminClient.auth.admin.generateLink({
-      type: "magiclink",
-      email: invitation.email,
-    });
 
     // Audit log
     await logAudit(adminClient, {
