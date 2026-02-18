@@ -38,7 +38,7 @@ export function InstallBanner() {
         <div className="flex-1">
           <p className="text-sm font-medium">Instalar GTBI</p>
           <p className="text-xs text-muted-foreground">
-            Acesse rapidamente pelo seu dispositivo.
+            Acesse rapidamente pelo dispositivo.
           </p>
         </div>
         <Button size="sm" onClick={handleInstall}>

@@ -22,7 +22,7 @@ Na página **Financeiro**, você encontra:
 
 As transações financeiras podem ser:
 
-- **Repasse** — Valor transferido pelo iFood para sua conta
+- **Repasse** — Valor transferido pelo iFood para a conta do restaurante
 - **Taxa de serviço** — Percentual cobrado pelo iFood sobre cada pedido
 - **Taxa de entrega** — Valor cobrado pela entrega (quando aplicável)
 - **Promoções** — Descontos subsidiados por promoções do iFood
@@ -82,7 +82,7 @@ O resumo no topo da página mostra:
 
 - Exporte os dados **mensalmente** para manter o controle contábil em dia
 - Compare o **repasse líquido** com o **faturamento bruto** para entender o impacto das taxas
-- Acompanhe os **cancelamentos** — eles afetam diretamente seu faturamento
+- Acompanhe os **cancelamentos** — eles afetam diretamente o faturamento do restaurante
 - Use os filtros para analisar períodos específicos (ex: fins de semana vs dias úteis)`,
     tags: ["financeiro", "repasse", "taxa", "exportar", "csv", "xls", "faturamento", "transação"],
   },

@@ -8,7 +8,7 @@ export const adminArticles: HelpArticle[] = [
     categoryLabel: "Administração",
     content: `# Administração de Usuários
 
-O módulo de administração permite gerenciar os usuários que têm acesso ao GTBI e definir suas permissões.
+O módulo de administração permite gerenciar os usuários que têm acesso ao GTBI e definir as permissões de cada um.
 
 ## Acessando a administração
 
@@ -57,7 +57,7 @@ Para convidar um novo usuário:
    - **Restaurantes** — Selecione quais restaurantes o usuário poderá acessar
 3. Clique em **Enviar convite**
 
-O usuário receberá um e-mail com um link para criar sua conta e definir uma senha.
+O usuário receberá um e-mail com um link para criar a conta e definir uma senha.
 
 ## Gerenciando usuários existentes
 

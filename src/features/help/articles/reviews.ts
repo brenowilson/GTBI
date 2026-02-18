@@ -8,7 +8,7 @@ export const reviewsArticles: HelpArticle[] = [
     categoryLabel: "Avaliações",
     content: `# Gerenciando Avaliações
 
-O módulo de avaliações permite visualizar e responder às avaliações que os clientes deixam no iFood sobre o seu restaurante.
+O módulo de avaliações permite visualizar e responder às avaliações que os clientes deixam no iFood sobre o restaurante selecionado.
 
 ## Visualizando avaliações
 
@@ -32,7 +32,7 @@ Você pode filtrar as avaliações por:
 Para responder uma avaliação manualmente:
 
 1. Clique na avaliação desejada
-2. Digite sua resposta no campo de texto
+2. Digite a resposta no campo de texto
 3. Clique em **Enviar resposta**
 
 ### Dicas para boas respostas
@@ -79,7 +79,7 @@ Você define modelos de resposta para cada faixa de nota:
 
 - **5 estrelas** — Ex: "Obrigado pela avaliação! Ficamos felizes que gostou. Esperamos você novamente!"
 - **4 estrelas** — Ex: "Obrigado pelo feedback! Estamos sempre buscando melhorar."
-- **3 estrelas** — Ex: "Agradecemos o feedback. Vamos trabalhar para melhorar sua experiência."
+- **3 estrelas** — Ex: "Agradecemos o feedback. Vamos trabalhar para melhorar a experiência."
 - **1-2 estrelas** — Ex: "Sentimos muito pela experiência. Entre em contato para resolvermos."
 
 ### 2. Resposta com IA

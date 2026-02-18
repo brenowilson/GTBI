@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NoRestaurantSelected } from "@/components/common/NoRestaurantSelected";
+import { useRestaurantStore } from "@/stores/restaurant.store";
 import { CatalogItemCard } from "../components/CatalogItemCard";
 import { ImageWorkflowModal } from "../components/ImageWorkflowModal";
 import { useCatalogItems, useImageJobRealtime } from "../hooks";
 import type { CatalogItem } from "@/entities/catalog-item/model";
 
 export function CatalogPage() {
+  const { selectedRestaurant } = useRestaurantStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<CatalogItem | null>(null);
@@ -16,6 +19,20 @@ export function CatalogPage() {
 
   // Subscribe to real-time image job updates
   useImageJobRealtime();
+
+  if (!selectedRestaurant) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Catálogo</h1>
+          <p className="text-muted-foreground">
+            Gerencie os produtos e imagens do cardápio do restaurante.
+          </p>
+        </div>
+        <NoRestaurantSelected />
+      </div>
+    );
+  }
 
   const filteredItems = (items ?? []).filter(
     (item) =>
@@ -52,7 +69,7 @@ export function CatalogPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Catálogo</h1>
         <p className="text-muted-foreground">
-          Gerencie os produtos e suas imagens no cardápio.
+          Gerencie os produtos e imagens do cardápio do restaurante.
         </p>
       </div>
 

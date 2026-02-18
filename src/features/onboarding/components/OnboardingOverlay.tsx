@@ -27,9 +27,9 @@ const STEPS: OnboardingStep[] = [
     icon: <Rocket className="h-16 w-16 text-primary" />,
     title: "Bem-vindo ao GTBI!",
     description:
-      "Sua plataforma de inteligência de negócios para restaurantes iFood.",
+      "Plataforma de inteligência de negócios da GT Consultoria para restaurantes iFood.",
     details: [
-      "Acompanhe a performance dos seus restaurantes",
+      "Acompanhe a performance dos restaurantes gerenciados",
       "Visualize relatórios completos em tempo real",
       "Gerencie avaliações, chamados e financeiro",
     ],
@@ -37,11 +37,11 @@ const STEPS: OnboardingStep[] = [
   },
   {
     icon: <Store className="h-16 w-16 text-primary" />,
-    title: "Selecione seu restaurante",
+    title: "Selecione um restaurante",
     description:
-      "O GTBI é organizado por restaurante. Use o seletor no topo da página para alternar entre seus estabelecimentos.",
+      "O GTBI é organizado por restaurante. Use o seletor no topo da página para alternar entre os estabelecimentos gerenciados.",
     details: [
-      "Cada restaurante tem seus próprios dados",
+      "Cada restaurante tem dados independentes",
       "Alterne rapidamente entre restaurantes",
       "Dados sempre atualizados via iFood",
     ],
@@ -51,14 +51,14 @@ const STEPS: OnboardingStep[] = [
     icon: <LayoutGrid className="h-16 w-16 text-primary" />,
     title: "Explore os módulos",
     description:
-      "O GTBI oferece módulos completos para gerenciar seu negócio:",
+      "O GTBI oferece módulos completos para gerenciar os restaurantes:",
     details: [
       "Performance — Métricas e KPIs em tempo real",
       "Relatórios — Análises detalhadas e exportáveis",
       "Avaliações — Acompanhe o feedback dos clientes",
       "Chamados — Gerencie solicitações e problemas",
       "Financeiro — Controle receitas e despesas",
-      "Catálogo — Gerencie seus produtos e cardápio",
+      "Catálogo — Gerencie produtos e cardápio",
     ],
     buttonLabel: "Próximo",
   },

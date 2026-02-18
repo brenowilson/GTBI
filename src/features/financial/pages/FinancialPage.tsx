@@ -1,21 +1,52 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { NoRestaurantSelected } from "@/components/common/NoRestaurantSelected";
+import { useRestaurantStore } from "@/stores/restaurant.store";
 import { FinancialSummaryCard } from "../components/FinancialSummaryCard";
 import { FinancialBreakdown } from "../components/FinancialBreakdown";
 import { ExportButtons } from "../components/ExportButtons";
 import { useFinancialSummary, useFinancialExport } from "../hooks";
 
+function formatDateToISO(date: Date): string {
+  return date.toISOString().split("T")[0] ?? "";
+}
+
 export function FinancialPage() {
-  const [startDate, setStartDate] = useState("2026-02-01");
-  const [endDate, setEndDate] = useState("2026-02-17");
+  const { selectedRestaurant } = useRestaurantStore();
+
+  const defaultDates = useMemo(() => {
+    const today = new Date();
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    return {
+      start: formatDateToISO(startOfMonth),
+      end: formatDateToISO(today),
+    };
+  }, []);
+
+  const [startDate, setStartDate] = useState(defaultDates.start);
+  const [endDate, setEndDate] = useState(defaultDates.end);
 
   const { data: summary, isLoading, error, refetch } = useFinancialSummary(startDate, endDate);
   const exportMutation = useFinancialExport();
 
   function handleExport(format: "csv" | "xls") {
     exportMutation.mutate({ startDate, endDate, format });
+  }
+
+  if (!selectedRestaurant) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Financeiro</h1>
+          <p className="text-muted-foreground">
+            Resumo financeiro e detalhamento por tipo de lançamento do restaurante.
+          </p>
+        </div>
+        <NoRestaurantSelected />
+      </div>
+    );
   }
 
   if (isLoading) {
@@ -54,7 +85,7 @@ export function FinancialPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Financeiro</h1>
           <p className="text-muted-foreground">
-            Resumo financeiro e detalhamento por tipo de lançamento.
+            Resumo financeiro e detalhamento por tipo de lançamento do restaurante.
           </p>
         </div>
         <ExportButtons onExport={handleExport} />

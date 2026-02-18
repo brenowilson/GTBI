@@ -47,7 +47,7 @@ export function SettingsPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Configurações</h1>
         <p className="text-muted-foreground">
-          Gerencie suas preferências e informações de perfil.
+          Preferências e informações do perfil.
         </p>
       </div>
 
@@ -85,7 +85,7 @@ export function SettingsPage() {
         <CardHeader>
           <CardTitle className="text-base">Perfil</CardTitle>
           <CardDescription>
-            Suas informações de perfil (somente leitura).
+            Informações do perfil (somente leitura).
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

@@ -126,23 +126,12 @@ export function AdminPage() {
     { id: "feat-5", name: "Catálogo" },
   ];
 
-  const isInitialLoading = statsLoading && usersLoading && rolesLoading;
+  const isInitialLoading = usersLoading && rolesLoading;
 
   if (isInitialLoading) {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
-  }
-
-  if (statsError) {
-    return (
-      <div className="flex h-full flex-col items-center justify-center gap-4">
-        <p className="text-muted-foreground">Erro ao carregar dados de administração.</p>
-        <Button variant="outline" onClick={() => refetchStats()}>
-          Tentar novamente
-        </Button>
       </div>
     );
   }
@@ -170,6 +159,15 @@ export function AdminPage() {
           {statsLoading ? (
             <div className="flex items-center justify-center py-12">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            </div>
+          ) : statsError ? (
+            <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+              <p className="text-muted-foreground">
+                Estatísticas indisponíveis no momento.
+              </p>
+              <Button variant="outline" size="sm" onClick={() => refetchStats()}>
+                Tentar novamente
+              </Button>
             </div>
           ) : mappedStats ? (
             <AdminDashboard stats={mappedStats} />

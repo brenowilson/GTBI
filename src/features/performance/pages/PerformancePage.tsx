@@ -1,4 +1,6 @@
 import { Button } from "@/components/ui/button";
+import { NoRestaurantSelected } from "@/components/common/NoRestaurantSelected";
+import { useRestaurantStore } from "@/stores/restaurant.store";
 import { FunnelChart } from "../components/FunnelChart";
 import { FunnelStepCard } from "../components/FunnelStepCard";
 import { OperationalLimitsPanel } from "../components/OperationalLimitsPanel";
@@ -15,7 +17,22 @@ const STEP_LABELS: Record<string, string> = {
 const FUNNEL_KEYS = ["visits", "views", "to_cart", "checkout", "completed"] as const;
 
 export function PerformancePage() {
+  const { selectedRestaurant } = useRestaurantStore();
   const { data, isLoading, error, refetch } = usePerformanceData();
+
+  if (!selectedRestaurant) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Performance</h1>
+          <p className="text-muted-foreground">
+            Acompanhe o funil de vendas e limites operacionais do restaurante selecionado.
+          </p>
+        </div>
+        <NoRestaurantSelected />
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -57,7 +74,7 @@ export function PerformancePage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Performance</h1>
         <p className="text-muted-foreground">
-          Acompanhe o funil de vendas e limites operacionais do seu restaurante.
+          Acompanhe o funil de vendas e limites operacionais do restaurante selecionado.
         </p>
       </div>
 

@@ -8,7 +8,7 @@ export const catalogArticles: HelpArticle[] = [
     categoryLabel: "Catálogo",
     content: `# Catálogo de Produtos
 
-O módulo de catálogo permite visualizar e gerenciar os produtos do seu cardápio no iFood diretamente pelo GTBI.
+O módulo de catálogo permite visualizar e gerenciar os produtos do cardápio do restaurante no iFood diretamente pelo GTBI.
 
 ## Visualizando o catálogo
 
@@ -47,7 +47,7 @@ Você pode pausar e reativar produtos diretamente pelo GTBI:
 2. Clique no **toggle de disponibilidade**
 3. O produto será pausado/reativado no iFood
 
-**Importante**: Manter produtos indisponíveis ativos no cardápio pode gerar cancelamentos e afetar sua taxa de cancelamento.
+**Importante**: Manter produtos indisponíveis ativos no cardápio pode gerar cancelamentos e afetar a taxa de cancelamento do restaurante.
 
 ## Buscando produtos
 
@@ -76,7 +76,7 @@ O catálogo é sincronizado automaticamente com o iFood. Alterações feitas dir
     categoryLabel: "Catálogo",
     content: `# Geração de Imagens com IA
 
-O GTBI oferece uma ferramenta de geração de imagens com inteligência artificial para criar fotos profissionais dos produtos do seu cardápio.
+O GTBI oferece uma ferramenta de geração de imagens com inteligência artificial para criar fotos profissionais dos produtos do cardápio.
 
 ## Por que usar imagens geradas por IA?
 
@@ -111,7 +111,7 @@ Aprimora uma foto existente do produto, melhorando iluminação, fundo e apresen
 
 Gera uma imagem no estilo de uma foto de referência que você fornece.
 
-**Como usar**: Envie uma foto de referência (ex: do Google ou Instagram) e o sistema cria uma imagem similar com o seu produto.
+**Como usar**: Envie uma foto de referência (ex: do Google ou Instagram) e o sistema cria uma imagem similar com o produto.
 
 ### 5. Personalizado
 

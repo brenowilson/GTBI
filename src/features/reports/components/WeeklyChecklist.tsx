@@ -45,7 +45,7 @@ export function WeeklyChecklist({ items, onToggle }: WeeklyChecklistProps) {
                 </Label>
                 {item.isChecked && (
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Marcado por usuário - placeholder
+                    Concluído
                   </p>
                 )}
               </div>

@@ -97,7 +97,7 @@ export function HelpArticlePage() {
         </div>
         {feedback && (
           <p className="text-xs text-muted-foreground">
-            Obrigado pelo seu feedback!
+            Obrigado pelo feedback!
           </p>
         )}
       </div>

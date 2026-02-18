@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { NoRestaurantSelected } from "@/components/common/NoRestaurantSelected";
 import { ReviewCard } from "../components/ReviewCard";
 import { AutoReplyControls } from "../components/AutoReplyControls";
 import { TemplateEditor } from "../components/TemplateEditor";
@@ -20,6 +21,20 @@ export function ReviewsPage() {
   const { selectedRestaurant } = useRestaurantStore();
 
   const [localTemplate, setLocalTemplate] = useState<string | null>(null);
+
+  if (!selectedRestaurant) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Avaliações</h1>
+          <p className="text-muted-foreground">
+            Gerencie avaliações e configure respostas automáticas do restaurante.
+          </p>
+        </div>
+        <NoRestaurantSelected />
+      </div>
+    );
+  }
 
   const templateValue = localTemplate ?? autoReply.template ?? "";
 
@@ -79,7 +94,7 @@ export function ReviewsPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Avaliações</h1>
         <p className="text-muted-foreground">
-          Gerencie avaliações e configure respostas automáticas.
+          Gerencie avaliações e configure respostas automáticas do restaurante.
         </p>
       </div>
 

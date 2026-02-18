@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -13,9 +14,31 @@ export function RestaurantSelector() {
     selectedRestaurant,
     accounts,
     restaurants,
+    isLoadingAccounts,
     setSelectedAccount,
     setSelectedRestaurant,
   } = useRestaurantStore();
+
+  if (isLoadingAccounts) {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-muted-foreground">Carregando contas...</span>
+      </div>
+    );
+  }
+
+  if (accounts.length === 0) {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-muted-foreground">
+          Nenhuma conta iFood conectada.{" "}
+          <Link to="/admin" className="text-primary underline underline-offset-4 hover:text-primary/80">
+            Conectar conta
+          </Link>
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center gap-2">

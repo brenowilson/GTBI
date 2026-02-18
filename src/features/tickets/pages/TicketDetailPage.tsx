@@ -113,7 +113,7 @@ export function TicketDetailPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <Textarea
-            placeholder="Digite sua resposta..."
+            placeholder="Digite a resposta..."
             value={replyContent}
             onChange={(e) => setReplyContent(e.target.value)}
             rows={3}
