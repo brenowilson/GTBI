@@ -23,14 +23,10 @@ export function ConnectIfoodAccountForm({
 }: ConnectIfoodAccountFormProps) {
   const [name, setName] = useState("");
   const [merchantId, setMerchantId] = useState("");
-  const [clientId, setClientId] = useState("");
-  const [clientSecret, setClientSecret] = useState("");
 
   const isValid =
     name.trim().length > 0 &&
-    merchantId.trim().length > 0 &&
-    clientId.trim().length > 0 &&
-    clientSecret.trim().length > 0;
+    merchantId.trim().length > 0;
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -39,14 +35,10 @@ export function ConnectIfoodAccountForm({
     onConnect({
       name: name.trim(),
       merchant_id: merchantId.trim(),
-      client_id: clientId.trim(),
-      client_secret: clientSecret.trim(),
     });
 
     setName("");
     setMerchantId("");
-    setClientId("");
-    setClientSecret("");
   }
 
   return (
@@ -59,7 +51,8 @@ export function ConnectIfoodAccountForm({
           <Alert>
             <Info className="h-4 w-4" />
             <AlertDescription>
-              Obtenha as credenciais no{" "}
+              O merchant precisa ter autorizado o app GTBI no portal iFood.
+              O Merchant ID pode ser obtido no painel do{" "}
               <a
                 href="https://developer.ifood.com.br"
                 target="_blank"
@@ -67,8 +60,7 @@ export function ConnectIfoodAccountForm({
                 className="font-medium underline underline-offset-4"
               >
                 Portal do Desenvolvedor iFood
-              </a>{" "}
-              (developer.ifood.com.br).
+              </a>.
             </AlertDescription>
           </Alert>
 
@@ -90,29 +82,6 @@ export function ConnectIfoodAccountForm({
               placeholder="Identificador do merchant no iFood"
               value={merchantId}
               onChange={(e) => setMerchantId(e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="ifood-client-id">Client ID</Label>
-            <Input
-              id="ifood-client-id"
-              placeholder="Client ID da API iFood"
-              value={clientId}
-              onChange={(e) => setClientId(e.target.value)}
-              disabled={isLoading}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="ifood-client-secret">Client Secret</Label>
-            <Input
-              id="ifood-client-secret"
-              type="password"
-              placeholder="Client Secret da API iFood"
-              value={clientSecret}
-              onChange={(e) => setClientSecret(e.target.value)}
               disabled={isLoading}
             />
           </div>

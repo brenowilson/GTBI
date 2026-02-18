@@ -26,8 +26,6 @@ export type IfoodAccountAccess = z.infer<typeof ifoodAccountAccessSchema>;
 export const connectIfoodAccountSchema = z.object({
   name: z.string().min(1, "Nome da conta é obrigatório"),
   merchant_id: z.string().min(1, "Merchant ID é obrigatório"),
-  client_id: z.string().min(1, "Client ID é obrigatório"),
-  client_secret: z.string().min(1, "Client Secret é obrigatório"),
 });
 
 export type ConnectIfoodAccountInput = z.infer<typeof connectIfoodAccountSchema>;

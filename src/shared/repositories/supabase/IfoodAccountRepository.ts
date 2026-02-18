@@ -47,8 +47,6 @@ export class SupabaseIfoodAccountRepository implements IIfoodAccountRepository {
       {
         name: input.name,
         merchant_id: input.merchant_id,
-        client_id: input.client_id,
-        client_secret: input.client_secret,
       },
     );
 

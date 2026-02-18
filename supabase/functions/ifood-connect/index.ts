@@ -30,22 +30,22 @@ const handler = withMiddleware(
 
     // Parse and validate input
     const body = await req.json();
-    const { merchant_id, client_id, client_secret, name } = body;
+    const { merchant_id, name } = body;
 
     if (!merchant_id || typeof merchant_id !== "string") {
       throw new ValidationError("merchant_id is required");
     }
 
-    if (!client_id || typeof client_id !== "string") {
-      throw new ValidationError("client_id is required");
-    }
-
-    if (!client_secret || typeof client_secret !== "string") {
-      throw new ValidationError("client_secret is required");
-    }
-
     if (!name || typeof name !== "string") {
       throw new ValidationError("name is required");
+    }
+
+    // App-level credentials from environment variables
+    const client_id = Deno.env.get("IFOOD_CLIENT_ID");
+    const client_secret = Deno.env.get("IFOOD_CLIENT_SECRET");
+
+    if (!client_id || !client_secret) {
+      throw new Error("IFOOD_CLIENT_ID and IFOOD_CLIENT_SECRET must be configured as Edge Function secrets");
     }
 
     // Check if account already exists for this merchant
