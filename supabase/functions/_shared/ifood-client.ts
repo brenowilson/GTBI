@@ -74,16 +74,21 @@ export interface IfoodUserCodeResponse {
 /**
  * Requests a user code for the iFood device authorization flow.
  * The user must enter this code on the iFood portal to authorize the app.
+ *
+ * Endpoint: POST /authentication/v1.0/oauth/userCode
+ * Content-Type: application/x-www-form-urlencoded
  */
 export async function requestUserCode(
   clientId: string,
 ): Promise<IfoodUserCodeResponse> {
+  const body = new URLSearchParams({ clientId });
+
   const response = await fetch(
     `${IFOOD_BASE_URL}/authentication/v1.0/oauth/userCode`,
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ clientId }),
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: body.toString(),
     },
   );
 
@@ -106,19 +111,27 @@ export async function requestUserCode(
 }
 
 /**
- * Exchanges an authorization code verifier for an OAuth token.
- * This is called after the user has entered the user code on the iFood portal.
+ * Exchanges an authorization code for an OAuth token.
+ * Called after the user has entered the user code on the iFood portal.
+ *
+ * Endpoint: POST /authentication/v1.0/oauth/token
+ * Content-Type: application/x-www-form-urlencoded
+ *
+ * Requires both authorizationCode (from portal) and
+ * authorizationCodeVerifier (from requestUserCode response).
  */
 export async function exchangeToken(
   clientId: string,
   clientSecret: string,
   authorizationCode: string,
+  authorizationCodeVerifier: string,
 ): Promise<IfoodTokenResponse> {
   const body = new URLSearchParams({
     grantType: "authorization_code",
     clientId,
     clientSecret,
     authorizationCode,
+    authorizationCodeVerifier,
   });
 
   const response = await fetch(IFOOD_AUTH_URL, {
@@ -153,10 +166,10 @@ export async function refreshToken(
   currentRefreshToken: string,
 ): Promise<IfoodTokenResponse> {
   const body = new URLSearchParams({
-    grant_type: "refresh_token",
-    client_id: clientId,
-    client_secret: clientSecret,
-    refresh_token: currentRefreshToken,
+    grantType: "refresh_token",
+    clientId,
+    clientSecret,
+    refreshToken: currentRefreshToken,
   });
 
   const response = await fetch(IFOOD_AUTH_URL, {

@@ -95,8 +95,15 @@ const handler = withMiddleware(
         throw new ValidationError("An iFood account already exists for this merchant_id");
       }
 
-      // Exchange verifier for tokens
-      const tokenData = await exchangeToken(clientId, clientSecret, authorization_code_verifier);
+      // Exchange verifier for tokens.
+      // In iFood's flow, the authorizationCodeVerifier from requestUserCode
+      // is used as both authorizationCode and authorizationCodeVerifier.
+      const tokenData = await exchangeToken(
+        clientId,
+        clientSecret,
+        authorization_code_verifier,
+        authorization_code_verifier,
+      );
 
       const tokenExpiresAt = new Date(
         Date.now() + tokenData.expiresIn * 1000,
