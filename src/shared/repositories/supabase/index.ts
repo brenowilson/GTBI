@@ -10,6 +10,7 @@ import { SupabaseCatalogRepository } from "./CatalogRepository";
 import { SupabaseImageJobRepository } from "./ImageJobRepository";
 import { SupabaseChecklistRepository } from "./ChecklistRepository";
 import { SupabaseAdminRepository } from "./AdminRepository";
+import { SupabaseWhatsAppInstanceRepository } from "./WhatsAppInstanceRepository";
 
 export const userRepository = new SupabaseUserRepository();
 export const ifoodAccountRepository = new SupabaseIfoodAccountRepository();
@@ -23,3 +24,4 @@ export const catalogRepository = new SupabaseCatalogRepository();
 export const imageJobRepository = new SupabaseImageJobRepository();
 export const checklistRepository = new SupabaseChecklistRepository();
 export const adminRepository = new SupabaseAdminRepository();
+export const whatsappInstanceRepository = new SupabaseWhatsAppInstanceRepository();

@@ -18,3 +18,11 @@ export {
   useCollectIfoodData,
   useDeactivateIfoodAccount,
 } from "./useIfoodAccounts";
+export {
+  useWhatsAppInstances,
+  useCreateWhatsAppInstance,
+  useConnectWhatsAppInstance,
+  useWhatsAppInstanceStatus,
+  useDisconnectWhatsAppInstance,
+  useDeleteWhatsAppInstance,
+} from "./useWhatsAppInstances";

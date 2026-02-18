@@ -17,3 +17,4 @@ export type {
   AuditLogFilters,
   SendNotificationInput,
 } from "./IAdminRepository";
+export type { IWhatsAppInstanceRepository, ConnectResult, StatusResult } from "./IWhatsAppInstanceRepository";

@@ -11,6 +11,9 @@ import { IfoodAccountCard } from "../components/IfoodAccountCard";
 import { ConnectIfoodAccountForm } from "../components/ConnectIfoodAccountForm";
 import { AuditLogTable } from "../components/AuditLogTable";
 import { NotificationComposer } from "../components/NotificationComposer";
+import { WhatsAppInstanceCard } from "../components/WhatsAppInstanceCard";
+import { CreateInstanceForm } from "../components/CreateInstanceForm";
+import { QRCodeModal } from "../components/QRCodeModal";
 import {
   useAdminStats,
   useUsers,
@@ -26,6 +29,11 @@ import {
   useConnectIfoodAccount,
   useSyncIfoodRestaurants,
   useDeactivateIfoodAccount,
+  useWhatsAppInstances,
+  useCreateWhatsAppInstance,
+  useConnectWhatsAppInstance,
+  useDisconnectWhatsAppInstance,
+  useDeleteWhatsAppInstance,
 } from "../hooks";
 import type { SendNotificationInput } from "@/shared/repositories/interfaces";
 
@@ -33,6 +41,9 @@ export function AdminPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") ?? "dashboard";
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
+  const [connectingInstanceId, setConnectingInstanceId] = useState<string | null>(null);
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [initialQrCode, setInitialQrCode] = useState<string | undefined>(undefined);
 
   function handleTabChange(value: string) {
     setSearchParams({ tab: value }, { replace: true });
@@ -52,6 +63,12 @@ export function AdminPage() {
   const connectIfoodAccount = useConnectIfoodAccount();
   const syncRestaurants = useSyncIfoodRestaurants();
   const deactivateAccount = useDeactivateIfoodAccount();
+
+  const { data: whatsappInstances, isLoading: whatsappLoading } = useWhatsAppInstances();
+  const createWhatsAppInstance = useCreateWhatsAppInstance();
+  const connectWhatsAppInstance = useConnectWhatsAppInstance();
+  const disconnectWhatsAppInstance = useDisconnectWhatsAppInstance();
+  const deleteWhatsAppInstance = useDeleteWhatsAppInstance();
 
   // Build a map from userId -> roleId for fast lookup
   const userRoleMap = useMemo(() => {
@@ -161,6 +178,36 @@ export function AdminPage() {
     deactivateAccount.mutate(accountId);
   }
 
+  function handleCreateInstance(name: string) {
+    createWhatsAppInstance.mutate(name);
+  }
+
+  function handleConnectInstance(instanceId: string) {
+    setConnectingInstanceId(instanceId);
+    connectWhatsAppInstance.mutate(
+      { instanceId },
+      {
+        onSuccess: (data) => {
+          setInitialQrCode(data.qrcode);
+          setQrModalOpen(true);
+        },
+      },
+    );
+  }
+
+  function handleDisconnectInstance(instanceId: string) {
+    disconnectWhatsAppInstance.mutate(instanceId);
+  }
+
+  function handleDeleteInstance(instanceId: string) {
+    deleteWhatsAppInstance.mutate(instanceId);
+  }
+
+  function handleInstanceConnected() {
+    setConnectingInstanceId(null);
+    setInitialQrCode(undefined);
+  }
+
   // Map users from API (snake_case) to UserTable component (camelCase)
   const mappedUsers = (users ?? []).map((u) => {
     const roleId = userRoleMap.get(u.id);
@@ -255,6 +302,7 @@ export function AdminPage() {
           <TabsTrigger value="users">Usuários</TabsTrigger>
           <TabsTrigger value="roles">Roles</TabsTrigger>
           <TabsTrigger value="accounts">Contas iFood</TabsTrigger>
+          <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
           <TabsTrigger value="logs">Logs</TabsTrigger>
           <TabsTrigger value="notifications">Notificações</TabsTrigger>
         </TabsList>
@@ -334,6 +382,34 @@ export function AdminPage() {
           )}
         </TabsContent>
 
+        <TabsContent value="whatsapp" className="space-y-4">
+          <CreateInstanceForm
+            onCreate={handleCreateInstance}
+            isLoading={createWhatsAppInstance.isPending}
+          />
+          {whatsappLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            </div>
+          ) : (whatsappInstances ?? []).length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-2 py-12 text-muted-foreground">
+              <p>Nenhuma instância WhatsApp configurada.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {(whatsappInstances ?? []).map((instance) => (
+                <WhatsAppInstanceCard
+                  key={instance.id}
+                  instance={instance}
+                  onConnect={handleConnectInstance}
+                  onDisconnect={handleDisconnectInstance}
+                  onDelete={handleDeleteInstance}
+                />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
         <TabsContent value="logs" className="space-y-4">
           {logsLoading ? (
             <div className="flex items-center justify-center py-12">
@@ -362,6 +438,14 @@ export function AdminPage() {
         roles={roleOptions}
         onSave={handleEditUserSave}
         isSaving={updateUserRole.isPending || deactivateUser.isPending || reactivateUser.isPending}
+      />
+
+      <QRCodeModal
+        open={qrModalOpen}
+        onOpenChange={setQrModalOpen}
+        instanceId={connectingInstanceId}
+        initialQrCode={initialQrCode}
+        onConnected={handleInstanceConnected}
       />
     </div>
   );
