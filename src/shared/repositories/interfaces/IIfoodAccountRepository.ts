@@ -4,11 +4,19 @@ export interface IfoodAccountFilters {
   isActive?: boolean;
 }
 
+export interface IfoodUserCodeResponse {
+  userCode: string;
+  verificationUrl: string;
+  authorizationCodeVerifier: string;
+  expiresIn: number;
+}
+
 export interface IIfoodAccountRepository {
   getAll(filters?: IfoodAccountFilters): Promise<IfoodAccount[]>;
   getById(id: string): Promise<IfoodAccount | null>;
   getAccessList(accountId: string): Promise<IfoodAccountAccess[]>;
-  connect(data: ConnectIfoodAccountInput): Promise<IfoodAccount>;
+  requestCode(): Promise<IfoodUserCodeResponse>;
+  connect(data: ConnectIfoodAccountInput & { authorization_code_verifier: string }): Promise<IfoodAccount>;
   refreshToken(accountId: string): Promise<void>;
   syncRestaurants(accountId: string): Promise<void>;
   collectData(restaurantId: string, weekStart: string, weekEnd: string): Promise<void>;

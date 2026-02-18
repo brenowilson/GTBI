@@ -1,5 +1,5 @@
 export type { IUserRepository, UserFilters, UserRoleAssignment, RolePermissionEntry, FeatureDefinition } from "./IUserRepository";
-export type { IIfoodAccountRepository, IfoodAccountFilters } from "./IIfoodAccountRepository";
+export type { IIfoodAccountRepository, IfoodAccountFilters, IfoodUserCodeResponse } from "./IIfoodAccountRepository";
 export type { IRestaurantRepository, RestaurantFilters, RestaurantSettingsUpdate } from "./IRestaurantRepository";
 export type { IReportRepository, ReportFilters } from "./IReportRepository";
 export type { IActionRepository, ActionFilters } from "./IActionRepository";

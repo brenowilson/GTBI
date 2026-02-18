@@ -63,17 +63,62 @@ export interface IfoodFinancialEntry {
   orderId?: string;
 }
 
+export interface IfoodUserCodeResponse {
+  authorizationCodeVerifier: string;
+  userCode: string;
+  verificationUrl: string;
+  verificationUrlComplete: string;
+  expiresIn: number;
+}
+
 /**
- * Exchanges client credentials for an OAuth token with the iFood API.
+ * Requests a user code for the iFood device authorization flow.
+ * The user must enter this code on the iFood portal to authorize the app.
+ */
+export async function requestUserCode(
+  clientId: string,
+): Promise<IfoodUserCodeResponse> {
+  const response = await fetch(
+    `${IFOOD_BASE_URL}/authentication/v1.0/oauth/userCode`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clientId }),
+    },
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new ExternalServiceError(
+      "iFood Auth",
+      `User code request failed (${response.status}): ${errorText}`,
+    );
+  }
+
+  const data = await response.json();
+  return {
+    authorizationCodeVerifier: data.authorizationCodeVerifier,
+    userCode: data.userCode,
+    verificationUrl: data.verificationUrl ?? "https://portal.ifood.com.br/apps/code",
+    verificationUrlComplete: data.verificationUrlComplete ?? data.verificationUrl ?? "https://portal.ifood.com.br/apps/code",
+    expiresIn: data.expiresIn ?? 600,
+  };
+}
+
+/**
+ * Exchanges an authorization code verifier for an OAuth token.
+ * This is called after the user has entered the user code on the iFood portal.
  */
 export async function exchangeToken(
   clientId: string,
   clientSecret: string,
+  authorizationCode: string,
 ): Promise<IfoodTokenResponse> {
   const body = new URLSearchParams({
-    grant_type: "client_credentials",
-    client_id: clientId,
-    client_secret: clientSecret,
+    grantType: "authorization_code",
+    clientId,
+    clientSecret,
+    authorizationCode,
   });
 
   const response = await fetch(IFOOD_AUTH_URL, {
@@ -92,10 +137,10 @@ export async function exchangeToken(
 
   const data = await response.json();
   return {
-    accessToken: data.access_token ?? data.accessToken,
-    refreshToken: data.refresh_token ?? data.refreshToken ?? "",
-    expiresIn: data.expires_in ?? data.expiresIn ?? 3600,
-    tokenType: data.token_type ?? data.tokenType ?? "Bearer",
+    accessToken: data.accessToken ?? data.access_token,
+    refreshToken: data.refreshToken ?? data.refresh_token ?? "",
+    expiresIn: data.expiresIn ?? data.expires_in ?? 3600,
+    tokenType: data.type ?? data.token_type ?? "Bearer",
   };
 }
 

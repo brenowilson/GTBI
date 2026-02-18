@@ -41,12 +41,32 @@ export class SupabaseIfoodAccountRepository implements IIfoodAccountRepository {
     return data ?? [];
   }
 
-  async connect(input: ConnectIfoodAccountInput): Promise<IfoodAccount> {
+  async requestCode(): Promise<{
+    userCode: string;
+    verificationUrl: string;
+    authorizationCodeVerifier: string;
+    expiresIn: number;
+  }> {
+    const { data, error } = await invokeFunction<{
+      userCode: string;
+      verificationUrl: string;
+      verificationUrlComplete: string;
+      authorizationCodeVerifier: string;
+      expiresIn: number;
+    }>("ifood-connect", { action: "request_code" });
+
+    if (error) throw new Error(error);
+    return data!;
+  }
+
+  async connect(input: ConnectIfoodAccountInput & { authorization_code_verifier: string }): Promise<IfoodAccount> {
     const { data, error } = await invokeFunction<{ success: boolean; account: IfoodAccount }>(
       "ifood-connect",
       {
+        action: "authorize",
         name: input.name,
         merchant_id: input.merchant_id,
+        authorization_code_verifier: input.authorization_code_verifier,
       },
     );
 

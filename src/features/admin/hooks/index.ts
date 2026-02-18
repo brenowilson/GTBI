@@ -18,6 +18,7 @@ export { useAdminNotifications, useSendNotification } from "./useAdminNotificati
 export {
   useIfoodAccounts,
   useIfoodAccountAccess,
+  useRequestIfoodCode,
   useConnectIfoodAccount,
   useSyncIfoodRestaurants,
   useCollectIfoodData,

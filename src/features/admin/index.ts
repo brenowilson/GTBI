@@ -22,6 +22,7 @@ export {
   useSendNotification,
   useIfoodAccounts,
   useIfoodAccountAccess,
+  useRequestIfoodCode,
   useConnectIfoodAccount,
   useSyncIfoodRestaurants,
   useCollectIfoodData,
@@ -39,4 +40,5 @@ export {
   deactivateUser,
   sendNotification,
   connectIfoodAccount,
+  requestIfoodCode,
 } from "./useCases";

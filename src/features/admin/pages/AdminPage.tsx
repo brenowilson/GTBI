@@ -24,7 +24,6 @@ import {
   useAuditLogs,
   useSendNotification,
   useIfoodAccounts,
-  useConnectIfoodAccount,
   useSyncIfoodRestaurants,
   useDeactivateIfoodAccount,
 } from "../hooks";
@@ -50,7 +49,6 @@ export function AdminPage() {
   const deactivateUser = useDeactivateUser();
   const reactivateUser = useReactivateUser();
   const sendNotification = useSendNotification();
-  const connectIfoodAccount = useConnectIfoodAccount();
   const syncRestaurants = useSyncIfoodRestaurants();
   const deactivateAccount = useDeactivateIfoodAccount();
 
@@ -289,10 +287,7 @@ export function AdminPage() {
         </TabsContent>
 
         <TabsContent value="accounts" className="space-y-4">
-          <ConnectIfoodAccountForm
-            onConnect={(data) => connectIfoodAccount.mutate(data)}
-            isLoading={connectIfoodAccount.isPending}
-          />
+          <ConnectIfoodAccountForm />
           {accountsLoading ? (
             <div className="flex items-center justify-center py-12">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />

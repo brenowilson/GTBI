@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ifoodAccountRepository } from "@/shared/repositories/supabase";
-import { connectIfoodAccount } from "../useCases/connectIfoodAccount";
+import { connectIfoodAccount, requestIfoodCode } from "../useCases/connectIfoodAccount";
 import { useRestaurantStore } from "@/stores/restaurant.store";
 import { useToast } from "@/shared/hooks/use-toast";
 import type { IfoodAccountFilters } from "@/shared/repositories/interfaces";
@@ -21,12 +21,37 @@ export function useIfoodAccountAccess(accountId: string | undefined) {
   });
 }
 
+export function useRequestIfoodCode() {
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: () => requestIfoodCode(),
+    onSuccess: (result) => {
+      if (!result.success) {
+        toast({
+          title: "Erro ao solicitar codigo",
+          description: result.error.message,
+          variant: "destructive",
+        });
+      }
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao solicitar codigo",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+}
+
 export function useConnectIfoodAccount() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: (input: ConnectIfoodAccountInput) => connectIfoodAccount(input),
+    mutationFn: (input: ConnectIfoodAccountInput & { authorization_code_verifier: string }) =>
+      connectIfoodAccount(input),
     onSuccess: (result) => {
       if (result.success) {
         queryClient.invalidateQueries({ queryKey: ["admin", "ifood-accounts"] });
