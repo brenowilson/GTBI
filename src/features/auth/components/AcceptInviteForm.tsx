@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Logo } from "@/components/common";
 import { supabase } from "@/shared/lib/supabase";
 import { PasswordStrength } from "./PasswordStrength";
 import { acceptInviteSchema, type AcceptInviteInput } from "../types";
@@ -50,6 +51,9 @@ export function AcceptInviteForm() {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader className="text-center">
+        <div className="mb-4 flex justify-center">
+          <Logo size="lg" />
+        </div>
         <CardTitle className="text-h2">Aceitar convite</CardTitle>
         <CardDescription>
           Configure sua conta para acessar o GTBI.

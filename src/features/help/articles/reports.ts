@@ -8,7 +8,7 @@ export const reportsArticles: HelpArticle[] = [
     categoryLabel: "Relatórios",
     content: `# Relatórios Semanais
 
-O GTBI gera relatórios semanais automaticamente com uma análise completa da performance do seu restaurante no iFood.
+O GTBI gera relatórios semanais automaticamente com uma análise completa da performance do restaurante no iFood.
 
 ## O que contém o relatório
 
@@ -31,7 +31,7 @@ Status de cada indicador operacional com alertas caso algum esteja fora do limit
 Resumo das avaliações recebidas, distribuição por nota e principais temas mencionados pelos clientes.
 
 ### Ações recomendadas
-Lista de ações práticas sugeridas com base na análise dos dados. Essas ações são adicionadas ao seu checklist semanal.
+Lista de ações práticas sugeridas com base na análise dos dados. Essas ações são adicionadas ao checklist semanal do restaurante.
 
 ## Quando o relatório é gerado
 
@@ -130,13 +130,13 @@ A evidência é importante para manter o histórico e comprovar que a ação foi
 
 ## Descartando uma ação
 
-Se uma ação não se aplica ao seu caso:
+Se uma ação não se aplica ao restaurante:
 
 1. Clique na ação desejada
 2. Clique em **Descartar**
 3. Informe o **motivo** (obrigatório):
    - Ex: "Já foi feito na semana anterior"
-   - Ex: "Não se aplica ao nosso modelo de negócio"
+   - Ex: "Não se aplica ao modelo de negócio do restaurante"
 4. Confirme o descarte
 
 ## Checklist semanal

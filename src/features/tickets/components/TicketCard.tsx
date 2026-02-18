@@ -15,7 +15,7 @@ interface TicketCardProps {
     subject: string | null;
     status: TicketStatus;
     createdAt: string;
-    messagesCount: number;
+    messagesCount?: number;
   };
   onClick?: (id: string) => void;
 }
@@ -69,10 +69,12 @@ export function TicketCard({ ticket, onClick }: TicketCardProps) {
       <CardContent>
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <span>Criado em: {formatDate(ticket.createdAt)}</span>
-          <span>
-            {ticket.messagesCount}{" "}
-            {ticket.messagesCount === 1 ? "mensagem" : "mensagens"}
-          </span>
+          {ticket.messagesCount != null && (
+            <span>
+              {ticket.messagesCount}{" "}
+              {ticket.messagesCount === 1 ? "mensagem" : "mensagens"}
+            </span>
+          )}
         </div>
       </CardContent>
     </Card>

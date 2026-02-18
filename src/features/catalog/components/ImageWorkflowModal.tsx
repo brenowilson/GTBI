@@ -2,9 +2,11 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +35,7 @@ export function ImageWorkflowModal({
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Editar Imagem - {item.name}</DialogTitle>
+          <VisuallyHidden><DialogDescription>Opções para editar ou gerar imagem do produto</DialogDescription></VisuallyHidden>
         </DialogHeader>
 
         <Tabs defaultValue="improve" className="mt-4">

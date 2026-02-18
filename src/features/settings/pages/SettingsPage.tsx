@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { useTheme } from "@/app/providers/ThemeProvider";
 import { useProfile } from "../hooks";
 
 function formatDate(dateString: string): string {
@@ -26,6 +27,7 @@ function formatDate(dateString: string): string {
 
 export function SettingsPage() {
   const { profile, isLoading, update } = useProfile();
+  const { theme, setTheme } = useTheme();
 
   if (isLoading) {
     return (
@@ -36,6 +38,7 @@ export function SettingsPage() {
   }
 
   function handleThemeChange(value: "light" | "dark" | "system") {
+    setTheme(value);
     update.mutate({ theme_preference: value });
   }
 
@@ -44,7 +47,7 @@ export function SettingsPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Configurações</h1>
         <p className="text-muted-foreground">
-          Gerencie suas preferências e informações de perfil.
+          Preferências e informações do perfil.
         </p>
       </div>
 
@@ -59,7 +62,7 @@ export function SettingsPage() {
           <div className="flex items-center justify-between">
             <Label htmlFor="theme-preference">Tema</Label>
             <Select
-              value={profile?.theme_preference ?? "system"}
+              value={theme}
               onValueChange={handleThemeChange}
             >
               <SelectTrigger id="theme-preference" className="w-[200px]">
@@ -82,7 +85,7 @@ export function SettingsPage() {
         <CardHeader>
           <CardTitle className="text-base">Perfil</CardTitle>
           <CardDescription>
-            Suas informações de perfil (somente leitura).
+            Informações do perfil (somente leitura).
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

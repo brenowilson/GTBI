@@ -8,15 +8,15 @@ export const gettingStartedArticles: HelpArticle[] = [
     categoryLabel: "Primeiros Passos",
     content: `# Primeiro acesso ao GTBI
 
-Bem-vindo ao GTBI! Este guia vai te ajudar a dar os primeiros passos na plataforma de gestão do seu restaurante no iFood.
+Bem-vindo ao GTBI! Este guia vai te ajudar a dar os primeiros passos na plataforma de gestão de restaurantes iFood da GT Consultoria.
 
 ## Como fazer login
 
-1. Acesse a plataforma pelo link fornecido pela sua equipe
-2. Na tela de login, insira seu **e-mail** e **senha**
+1. Acesse a plataforma pelo link fornecido pela equipe
+2. Na tela de login, insira o **e-mail** e **senha**
 3. Clique em **Entrar**
 
-Se você recebeu um convite por e-mail, clique no link do convite para criar sua conta e definir uma senha.
+Se você recebeu um convite por e-mail, clique no link do convite para criar a conta e definir uma senha.
 
 ## Navegação principal
 
@@ -41,17 +41,17 @@ Clique no ícone de sol/lua no canto superior direito para alternar entre o tema
 
 ## Esqueceu a senha?
 
-Na tela de login, clique em **Esqueci minha senha**. Você receberá um e-mail com um link para redefinir sua senha. O link expira em 24 horas.`,
+Na tela de login, clique em **Esqueci minha senha**. Você receberá um e-mail com um link para redefinir a senha. O link expira em 24 horas.`,
     tags: ["login", "acesso", "navegação", "primeiro acesso", "senha", "tema"],
   },
   {
     id: "connecting-ifood",
-    title: "Conectando sua conta iFood",
+    title: "Conectando uma conta iFood",
     category: "getting-started",
     categoryLabel: "Primeiros Passos",
-    content: `# Conectando sua conta iFood
+    content: `# Conectando uma conta iFood
 
-Para que o GTBI possa exibir os dados do seu restaurante, é necessário conectar sua conta do iFood à plataforma.
+Para que o GTBI possa exibir os dados do restaurante, é necessário conectar a conta do iFood à plataforma.
 
 ## Pré-requisitos
 
@@ -86,7 +86,7 @@ Na tela de **Admin > Contas iFood**, verifique se o status da conta está como *
 
 ## Múltiplos restaurantes
 
-Você pode conectar quantos restaurantes quiser. Cada restaurante terá seus dados separados e poderá ser selecionado no seletor do topo da tela.`,
+É possível conectar quantos restaurantes forem necessários. Cada restaurante terá dados separados e poderá ser selecionado no seletor do topo da tela.`,
     tags: ["ifood", "conexão", "conta", "sincronização", "merchant", "api", "restaurante"],
   },
 ];

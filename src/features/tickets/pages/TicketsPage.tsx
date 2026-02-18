@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { NoRestaurantSelected } from "@/components/common/NoRestaurantSelected";
 import { TicketCard } from "../components/TicketCard";
 import { TicketAutoReplyControls } from "../components/TicketAutoReplyControls";
 import { useTickets, useTicketAutoReply } from "../hooks";
@@ -9,6 +10,20 @@ export function TicketsPage() {
   const { data: tickets, isLoading, error, refetch } = useTickets();
   const autoReply = useTicketAutoReply();
   const { selectedRestaurant } = useRestaurantStore();
+
+  if (!selectedRestaurant) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Chamados</h1>
+          <p className="text-muted-foreground">
+            Gerencie chamados de suporte e configure respostas automáticas do restaurante.
+          </p>
+        </div>
+        <NoRestaurantSelected />
+      </div>
+    );
+  }
 
   const restaurants = selectedRestaurant
     ? [
@@ -46,7 +61,6 @@ export function TicketsPage() {
     subject: t.subject,
     status: t.status,
     createdAt: t.created_at,
-    messagesCount: 0,
   }));
 
   return (
@@ -54,7 +68,7 @@ export function TicketsPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Chamados</h1>
         <p className="text-muted-foreground">
-          Gerencie chamados de suporte e configure respostas automáticas.
+          Gerencie chamados de suporte e configure respostas automáticas do restaurante.
         </p>
       </div>
 

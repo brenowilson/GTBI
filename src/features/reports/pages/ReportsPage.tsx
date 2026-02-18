@@ -7,12 +7,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { NoRestaurantSelected } from "@/components/common/NoRestaurantSelected";
+import { useRestaurantStore } from "@/stores/restaurant.store";
 import { ReportCard } from "../components/ReportCard";
 import { SendReportModal } from "../components/SendReportModal";
 import { useReports, useSendReport } from "../hooks";
 import type { ReportStatus } from "@/entities/report/model";
 
 export function ReportsPage() {
+  const { selectedRestaurant } = useRestaurantStore();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sendModalOpen, setSendModalOpen] = useState(false);
   const [selectedReportId, setSelectedReportId] = useState("");
@@ -33,6 +36,20 @@ export function ReportsPage() {
     sendReport.mutate(
       { reportId: selectedReportId, channels },
       { onSettled: () => setSendModalOpen(false) },
+    );
+  }
+
+  if (!selectedRestaurant) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Relatórios</h1>
+          <p className="text-muted-foreground">
+            Gerencie e envie relatórios semanais para os clientes.
+          </p>
+        </div>
+        <NoRestaurantSelected />
+      </div>
     );
   }
 
@@ -57,7 +74,7 @@ export function ReportsPage() {
 
   const mappedReports = (reports ?? []).map((r) => ({
     id: r.id,
-    restaurantName: r.restaurant_id,
+    restaurantName: selectedRestaurant?.name ?? r.restaurant_id,
     weekStart: r.week_start,
     weekEnd: r.week_end,
     status: r.status,
@@ -70,7 +87,7 @@ export function ReportsPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Relatórios</h1>
           <p className="text-muted-foreground">
-            Gerencie e envie os relatórios semanais.
+            Gerencie e envie relatórios semanais para os clientes.
           </p>
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>

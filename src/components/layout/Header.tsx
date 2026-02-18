@@ -11,7 +11,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useTheme } from "@/app/providers/ThemeProvider";
 import { useAuthStore } from "@/stores/auth.store";
 import { useRestaurantStore } from "@/stores/restaurant.store";
@@ -52,6 +53,7 @@ export function Header() {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="w-64 p-0">
+          <VisuallyHidden><SheetTitle>Menu de navegação</SheetTitle></VisuallyHidden>
           <MobileSidebar />
         </SheetContent>
       </Sheet>

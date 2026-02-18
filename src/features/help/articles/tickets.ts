@@ -8,7 +8,7 @@ export const ticketsArticles: HelpArticle[] = [
     categoryLabel: "Chamados",
     content: `# Gerenciando Chamados
 
-O módulo de chamados permite acompanhar e responder aos tickets abertos no iFood relacionados ao seu restaurante.
+O módulo de chamados permite acompanhar e responder aos tickets abertos no iFood relacionados ao restaurante selecionado.
 
 ## O que são chamados
 
@@ -42,7 +42,7 @@ Para responder um chamado:
 
 1. Abra o chamado desejado
 2. Leia o histórico completo da conversa
-3. Digite sua resposta no campo de texto
+3. Digite a resposta no campo de texto
 4. Clique em **Enviar**
 
 ## Resposta automática de chamados

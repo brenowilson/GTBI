@@ -8,22 +8,22 @@ export const performanceArticles: HelpArticle[] = [
     categoryLabel: "Performance",
     content: `# Como usar o Dashboard de Performance
 
-O dashboard de performance mostra os principais indicadores do seu restaurante no iFood, permitindo acompanhar a evolução das vendas e identificar oportunidades de melhoria.
+O dashboard de performance mostra os principais indicadores do restaurante selecionado no iFood, permitindo acompanhar a evolução das vendas e identificar oportunidades de melhoria.
 
 ## Funil de Conversão
 
 O funil mostra as etapas que o cliente percorre desde a busca até a compra:
 
-1. **Visitas** — Quantas vezes seu restaurante apareceu nas buscas do iFood
-2. **Visualizações** — Quantas vezes os clientes abriram a página do seu restaurante
+1. **Visitas** — Quantas vezes o restaurante apareceu nas buscas do iFood
+2. **Visualizações** — Quantas vezes os clientes abriram a página do restaurante
 3. **Carrinho** — Quantas vezes adicionaram itens ao carrinho
 4. **Checkout** — Quantas vezes iniciaram o processo de pagamento
 5. **Concluídos** — Quantos pedidos foram finalizados com sucesso
 
 ### Como interpretar o funil
 
-- A **taxa de conversão** entre cada etapa indica onde você está perdendo clientes
-- Uma queda grande entre **Visitas** e **Visualizações** pode indicar que sua foto de capa ou posição no ranking precisam melhorar
+- A **taxa de conversão** entre cada etapa indica onde o restaurante está perdendo clientes
+- Uma queda grande entre **Visitas** e **Visualizações** pode indicar que a foto de capa ou posição no ranking precisam melhorar
 - Uma queda entre **Carrinho** e **Checkout** pode indicar problemas com preço de entrega ou tempo estimado
 - Uma queda entre **Checkout** e **Concluídos** pode indicar problemas com pagamento ou cancelamentos
 
@@ -42,7 +42,7 @@ Os dados exibidos correspondem à semana atual. A comparação é feita automati
 
 - Acompanhe o funil **semanalmente** para identificar tendências
 - Foque na etapa com **maior perda** de conversão
-- Compare os dados com as **ações** que você implementou na semana
+- Compare os dados com as **ações** implementadas na semana
 - Use os **relatórios semanais** para ter análises mais detalhadas`,
     tags: ["funil", "conversão", "métricas", "kpi", "dashboard", "vendas", "pedidos"],
   },
@@ -53,7 +53,7 @@ Os dados exibidos correspondem à semana atual. A comparação é feita automati
     categoryLabel: "Performance",
     content: `# Entendendo os Limites Operacionais
 
-Os limites operacionais são indicadores que o iFood monitora para avaliar a qualidade da operação do seu restaurante. Manter esses indicadores dentro dos limites recomendados é essencial para não sofrer penalizações.
+Os limites operacionais são indicadores que o iFood monitora para avaliar a qualidade da operação do restaurante. Manter esses indicadores dentro dos limites recomendados é essencial para evitar penalizações.
 
 ## Indicadores monitorados
 
@@ -65,7 +65,7 @@ Percentual de pedidos cancelados pelo restaurante em relação ao total de pedid
 - **Atenção**: Entre 2% e 5%
 - **Crítico**: Acima de 5%
 
-**Dica**: Cancelamentos por falta de insumo são os mais comuns. Mantenha seu cardápio atualizado e desative itens indisponíveis.
+**Dica**: Cancelamentos por falta de insumo são os mais comuns. Mantenha o cardápio atualizado e desative itens indisponíveis.
 
 ### Taxa de Abertura
 
@@ -75,7 +75,7 @@ Percentual de tempo em que o restaurante esteve aberto dentro do horário progra
 - **Atenção**: Entre 85% e 95%
 - **Crítico**: Abaixo de 85%
 
-**Dica**: Fechar fora do horário programado prejudica seu ranking no iFood. Se precisar fechar, atualize o horário no app do iFood.
+**Dica**: Fechar fora do horário programado prejudica o ranking no iFood. Se necessário fechar, atualize o horário no app do iFood.
 
 ### Taxa de Chamados Abertos
 
@@ -95,7 +95,7 @@ Percentual de pedidos realizados por clientes que compraram pela primeira vez.
 - **Neutro**: Entre 15% e 30%
 - **Atenção**: Abaixo de 15%
 
-**Dica**: Uma taxa baixa de novos clientes pode indicar que seu restaurante não está aparecendo para novas pessoas. Considere promoções ou melhorias nas fotos do cardápio.
+**Dica**: Uma taxa baixa de novos clientes pode indicar que o restaurante não está aparecendo para novas pessoas. Considere recomendar promoções ou melhorias nas fotos do cardápio.
 
 ## Alertas
 
@@ -103,7 +103,7 @@ Quando um indicador entra na zona de **Atenção** ou **Crítico**, o GTBI exibe
 
 ## Como melhorar
 
-Cada indicador está ligado a ações práticas que você pode tomar:
+Cada indicador está ligado a ações práticas que podem ser recomendadas ao cliente:
 
 1. **Revise o cardápio** regularmente para evitar cancelamentos
 2. **Cumpra os horários** de abertura programados
