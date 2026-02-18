@@ -64,7 +64,7 @@ export function ConnectIfoodAccountForm() {
   function handleCopyCode() {
     navigator.clipboard.writeText(userCode);
     setCopied(true);
-    toast({ title: "Codigo copiado!" });
+    toast({ title: "Código copiado!" });
     setTimeout(() => setCopied(false), 2000);
   }
 
@@ -93,7 +93,7 @@ export function ConnectIfoodAccountForm() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Acesse o portal iFood e insira o codigo abaixo para autorizar a conexao:
+            Acesse o portal iFood e insira o código abaixo para autorizar a conexão:
           </p>
 
           <div className="flex items-center justify-center gap-3 rounded-lg border-2 border-dashed bg-muted/50 p-6">
@@ -120,7 +120,7 @@ export function ConnectIfoodAccountForm() {
 
           <Alert>
             <AlertDescription>
-              Apos inserir o codigo no portal, clique em "Confirmar Autorizacao" abaixo.
+              Após inserir o código no portal, clique em "Confirmar Autorização" abaixo.
             </AlertDescription>
           </Alert>
 
@@ -136,7 +136,7 @@ export function ConnectIfoodAccountForm() {
                   Verificando...
                 </>
               ) : (
-                "Confirmar Autorizacao"
+                "Confirmar Autorização"
               )}
             </Button>
             <Button
@@ -185,7 +185,7 @@ export function ConnectIfoodAccountForm() {
             {requestCode.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Solicitando codigo...
+                Solicitando código...
               </>
             ) : (
               "Conectar"

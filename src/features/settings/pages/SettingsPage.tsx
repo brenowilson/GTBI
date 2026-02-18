@@ -71,12 +71,12 @@ export function SettingsPage() {
     if (!file || !profile?.id) return;
 
     if (!file.type.startsWith("image/")) {
-      toast({ title: "Arquivo invalido", description: "Selecione uma imagem.", variant: "destructive" });
+      toast({ title: "Arquivo inválido", description: "Selecione uma imagem.", variant: "destructive" });
       return;
     }
 
     if (file.size > 2 * 1024 * 1024) {
-      toast({ title: "Arquivo muito grande", description: "Maximo 2MB.", variant: "destructive" });
+      toast({ title: "Arquivo muito grande", description: "Máximo 2MB.", variant: "destructive" });
       return;
     }
 
@@ -118,9 +118,9 @@ export function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Configuracoes</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Configurações</h1>
         <p className="text-muted-foreground">
-          Preferencias e informacoes do perfil.
+          Preferências e informações do perfil.
         </p>
       </div>
 
@@ -233,9 +233,9 @@ export function SettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Aparencia</CardTitle>
+          <CardTitle className="text-base">Aparência</CardTitle>
           <CardDescription>
-            Configure o tema visual da aplicacao.
+            Configure o tema visual da aplicação.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

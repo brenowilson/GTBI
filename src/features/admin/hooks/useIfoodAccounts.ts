@@ -29,7 +29,7 @@ export function useRequestIfoodCode() {
     onSuccess: (result) => {
       if (!result.success) {
         toast({
-          title: "Erro ao solicitar codigo",
+          title: "Erro ao solicitar código",
           description: result.error.message,
           variant: "destructive",
         });
@@ -37,7 +37,7 @@ export function useRequestIfoodCode() {
     },
     onError: (error: Error) => {
       toast({
-        title: "Erro ao solicitar codigo",
+        title: "Erro ao solicitar código",
         description: error.message,
         variant: "destructive",
       });

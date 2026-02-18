@@ -43,13 +43,13 @@ import type { RolePermissionEntry } from "@/shared/repositories/interfaces";
 // ---------------------------------------------------------------------------
 
 const FEATURE_LABELS: Record<string, string> = {
-  reports: "Relatorios",
-  reviews: "Avaliacoes",
+  reports: "Relatórios",
+  reviews: "Avaliações",
   tickets: "Chamados",
   financial: "Financeiro",
-  catalog: "Catalogo",
+  catalog: "Catálogo",
   restaurants: "Restaurantes",
-  users: "Usuarios",
+  users: "Usuários",
 };
 
 const FEATURE_ORDER = [
@@ -66,10 +66,10 @@ const CRUD_ACTIONS = ["create", "read", "update", "delete"] as const;
 type CrudAction = (typeof CRUD_ACTIONS)[number];
 
 const CRUD_LABELS: Record<CrudAction, string> = {
-  create: "Criacao",
+  create: "Criação",
   read: "Leitura",
-  update: "Edicao",
-  delete: "Exclusao",
+  update: "Edição",
+  delete: "Exclusão",
 };
 
 interface ActionDescription {
@@ -82,15 +82,15 @@ const FEATURE_ACTION_DESCRIPTIONS: Record<
   Record<CrudAction, ActionDescription>
 > = {
   reports: {
-    create: { label: "Gerar relatorios semanais" },
-    read: { label: "Visualizar relatorios" },
-    update: { label: "Editar conteudo interno e enviar" },
-    delete: { label: "Remover relatorios" },
+    create: { label: "Gerar relatórios semanais" },
+    read: { label: "Visualizar relatórios" },
+    update: { label: "Editar conteúdo interno e enviar" },
+    delete: { label: "Remover relatórios" },
   },
   reviews: {
     create: { label: "Criar respostas" },
-    read: { label: "Ver avaliacoes" },
-    update: { label: "Editar configuracoes de resposta" },
+    read: { label: "Ver avaliações" },
+    update: { label: "Editar configurações de resposta" },
     delete: { label: "Remover respostas" },
   },
   tickets: {
@@ -106,22 +106,22 @@ const FEATURE_ACTION_DESCRIPTIONS: Record<
     delete: { label: "N/A", disabled: true },
   },
   catalog: {
-    create: { label: "Adicionar itens ao catalogo" },
-    read: { label: "Ver catalogo" },
+    create: { label: "Adicionar itens ao catálogo" },
+    read: { label: "Ver catálogo" },
     update: { label: "Editar itens e gerar imagens" },
     delete: { label: "Remover itens" },
   },
   restaurants: {
     create: { label: "Conectar contas iFood" },
     read: { label: "Ver restaurantes" },
-    update: { label: "Editar configuracoes" },
+    update: { label: "Editar configurações" },
     delete: { label: "Desativar restaurantes" },
   },
   users: {
-    create: { label: "Convidar usuarios" },
-    read: { label: "Ver lista de usuarios" },
+    create: { label: "Convidar usuários" },
+    read: { label: "Ver lista de usuários" },
     update: { label: "Alterar perfis de acesso" },
-    delete: { label: "Desativar usuarios" },
+    delete: { label: "Desativar usuários" },
   },
 };
 
@@ -233,7 +233,7 @@ function FeatureAccordionSection({
               htmlFor={`select-all-${featureCode}`}
               className="text-sm font-medium cursor-pointer"
             >
-              Selecionar todas as permissoes
+              Selecionar todas as permissões
             </Label>
           </div>
 
@@ -428,8 +428,8 @@ function RoleEditDialog({
           </DialogTitle>
           <DialogDescription>
             {isCreating
-              ? "Configure o nome, descricao e permissoes do novo perfil."
-              : "Altere as informacoes e permissoes deste perfil."}
+              ? "Configure o nome, descrição e permissões do novo perfil."
+              : "Altere as informações e permissões deste perfil."}
           </DialogDescription>
         </DialogHeader>
 
@@ -448,7 +448,7 @@ function RoleEditDialog({
 
           {/* Description field */}
           <div className="space-y-2">
-            <Label htmlFor="role-description">Descricao</Label>
+            <Label htmlFor="role-description">Descrição</Label>
             <Textarea
               id="role-description"
               placeholder="Descreva brevemente as responsabilidades deste perfil"
@@ -462,7 +462,7 @@ function RoleEditDialog({
           {/* Permissions accordion (only show when editing or creating) */}
           {!isCreating || name.trim().length > 0 ? (
             <div className="space-y-2">
-              <Label>Permissoes</Label>
+              <Label>Permissões</Label>
               <Accordion type="multiple" className="w-full">
                 {featureCodes.map((code) => (
                   <FeatureAccordionSection
@@ -584,7 +584,7 @@ export function RoleMatrix() {
           ? "Perfil atualizado"
           : "Perfil criado",
         description: data.roleId
-          ? "As permissoes foram atualizadas com sucesso."
+          ? "As permissões foram atualizadas com sucesso."
           : "O novo perfil de acesso foi criado com sucesso.",
       });
 

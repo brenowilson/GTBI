@@ -81,8 +81,8 @@ export function WhatsAppPanel() {
               </h3>
               <p className="mt-1 text-sm text-muted-foreground">
                 {instance
-                  ? "A conexao com o WhatsApp foi perdida. Reconecte para continuar enviando mensagens."
-                  : "Conecte um numero de WhatsApp para enviar relatorios e notificacoes."}
+                  ? "A conexão com o WhatsApp foi perdida. Reconecte para continuar enviando mensagens."
+                  : "Conecte um número de WhatsApp para enviar relatórios e notificações."}
               </p>
             </div>
             <Button onClick={handleConnect} disabled={busy} size="lg">
@@ -103,7 +103,7 @@ export function WhatsAppPanel() {
                 disabled={deleteInstance.isPending}
               >
                 <Trash2 className="mr-1 h-3 w-3" />
-                Remover instancia
+                Remover instância
               </Button>
             )}
           </CardContent>

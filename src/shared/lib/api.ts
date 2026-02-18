@@ -19,7 +19,7 @@ export async function invokeFunction<T>(
 
   if (!session?.access_token) {
     console.error(`[api] ${functionName}: no session — user must re-login`);
-    return { data: null, error: "Sessao expirada. Faca login novamente." };
+    return { data: null, error: "Sessão expirada. Faça login novamente." };
   }
 
   const url = `${env.supabase.url}/functions/v1/${functionName}`;
