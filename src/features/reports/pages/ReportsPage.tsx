@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +17,7 @@ import { useReports, useAllReports, useSendReport } from "../hooks";
 import type { ReportStatus } from "@/entities/report/model";
 
 export function ReportsPage() {
+  const navigate = useNavigate();
   const { selectedRestaurant } = useRestaurantStore();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sendModalOpen, setSendModalOpen] = useState(false);
@@ -113,6 +115,7 @@ export function ReportsPage() {
           <ReportCard
             key={report.id}
             report={report}
+            onView={(id) => navigate(`/reports/${id}`)}
             onSend={handleSend}
           />
         ))}
