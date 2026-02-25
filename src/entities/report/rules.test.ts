@@ -8,6 +8,7 @@ const makeReport = (status: Report["status"]): Report => ({
   week_start: "2026-02-10",
   week_end: "2026-02-16",
   status,
+  source: "api",
   pdf_url: null,
   pdf_hash: null,
   generated_at: "2026-02-17T06:00:00Z",

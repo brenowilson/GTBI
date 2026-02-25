@@ -3,7 +3,6 @@ import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { BottomNav } from "./BottomNav";
 import { ProtectedRoute } from "@/components/common/ProtectedRoute";
-import { WhatsAppDisconnectBanner } from "@/components/common/WhatsAppDisconnectBanner";
 
 export function AppLayout() {
   return (
@@ -18,7 +17,6 @@ export function AppLayout() {
           <BottomNav />
         </div>
       </div>
-      <WhatsAppDisconnectBanner />
     </ProtectedRoute>
   );
 }

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ifoodAccountRepository } from "@/shared/repositories/supabase";
 import { connectIfoodAccount, requestIfoodCode } from "../useCases/connectIfoodAccount";
+import { addIfoodAccountManually } from "../useCases/addIfoodAccountManually";
 import { useRestaurantStore } from "@/stores/restaurant.store";
 import { useToast } from "@/shared/hooks/use-toast";
 import type { IfoodAccountFilters } from "@/shared/repositories/interfaces";
@@ -126,6 +127,39 @@ export function useCollectIfoodData() {
     onError: (error: Error) => {
       toast({
         title: "Erro na coleta de dados",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+export function useAddIfoodAccountManually() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: (input: ConnectIfoodAccountInput) =>
+      addIfoodAccountManually(input),
+    onSuccess: (result) => {
+      if (result.success) {
+        queryClient.invalidateQueries({ queryKey: ["admin", "ifood-accounts"] });
+        queryClient.invalidateQueries({ queryKey: ["admin", "stats"] });
+        toast({
+          title: "Conta adicionada",
+          description: "A conta iFood foi adicionada com sucesso.",
+        });
+      } else {
+        toast({
+          title: "Erro ao adicionar conta",
+          description: result.error.message,
+          variant: "destructive",
+        });
+      }
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao adicionar conta",
         description: error.message,
         variant: "destructive",
       });

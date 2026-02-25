@@ -20,6 +20,7 @@ export {
   useIfoodAccountAccess,
   useRequestIfoodCode,
   useConnectIfoodAccount,
+  useAddIfoodAccountManually,
   useSyncIfoodRestaurants,
   useCollectIfoodData,
   useDeactivateIfoodAccount,

@@ -1,4 +1,5 @@
-export { useReports } from "./useReports";
+export { useReports, useAllReports } from "./useReports";
+export { useUploadScreenshots, useGenerateReportFromScreenshots } from "./useScreenshotReport";
 export { useReport, useReportSendLogs } from "./useReport";
 export { useGenerateReport, useSendReport } from "./useReportActions";
 export { useInternalContent } from "./useInternalContent";

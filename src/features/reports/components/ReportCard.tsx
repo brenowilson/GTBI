@@ -13,10 +13,11 @@ import type { ReportStatus } from "@/entities/report/model";
 interface ReportCardProps {
   report: {
     id: string;
-    restaurantName: string;
+    restaurantName: string | null;
     weekStart: string;
     weekEnd: string;
     status: ReportStatus;
+    source?: string;
     generatedAt: string;
   };
   onView?: (id: string) => void;
@@ -46,17 +47,31 @@ function formatDate(dateString: string): string {
 }
 
 export function ReportCard({ report, onView, onSend }: ReportCardProps) {
+  const isScreenshot = report.source === "screenshots";
+
   return (
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
-          <CardTitle className="text-base">{report.restaurantName}</CardTitle>
-          <Badge
-            variant="outline"
-            className={cn(statusStyles[report.status])}
-          >
-            {statusLabels[report.status]}
-          </Badge>
+          <CardTitle className="text-base">
+            {report.restaurantName ?? "Sem restaurante"}
+          </CardTitle>
+          <div className="flex gap-1.5">
+            {isScreenshot && (
+              <Badge
+                variant="outline"
+                className="bg-purple-100 text-purple-800 border-purple-200"
+              >
+                Via Capturas de Tela
+              </Badge>
+            )}
+            <Badge
+              variant="outline"
+              className={cn(statusStyles[report.status])}
+            >
+              {statusLabels[report.status]}
+            </Badge>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="pb-3">

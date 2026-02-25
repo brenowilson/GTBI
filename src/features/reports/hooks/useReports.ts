@@ -12,3 +12,10 @@ export function useReports(filters?: ReportFilters) {
     enabled: !!selectedRestaurant?.id,
   });
 }
+
+export function useAllReports(filters?: ReportFilters) {
+  return useQuery({
+    queryKey: ["reports", "all", filters],
+    queryFn: () => reportRepository.getAllReports(filters),
+  });
+}

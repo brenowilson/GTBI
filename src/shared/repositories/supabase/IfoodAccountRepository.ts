@@ -121,6 +121,34 @@ export class SupabaseIfoodAccountRepository implements IIfoodAccountRepository {
     if (error) throw new Error(error.message);
   }
 
+  async addManually(input: ConnectIfoodAccountInput): Promise<IfoodAccount> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+
+    const { data, error } = await supabase
+      .from("ifood_accounts")
+      .insert({
+        name: input.name,
+        merchant_id: input.merchant_id,
+        is_active: true,
+        created_by: user.id,
+      })
+      .select("id, name, merchant_id, is_active, token_expires_at, last_sync_at, created_at, updated_at")
+      .single();
+
+    if (error) throw new Error(error.message);
+
+    await supabase
+      .from("ifood_account_access")
+      .insert({
+        ifood_account_id: data.id,
+        user_id: user.id,
+        granted_by: user.id,
+      });
+
+    return data;
+  }
+
   async deactivate(id: string): Promise<void> {
     const { error } = await supabase
       .from("ifood_accounts")

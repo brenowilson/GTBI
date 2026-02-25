@@ -20,8 +20,8 @@ export function OfflineIndicator() {
   if (!isOffline) return null;
 
   return (
-    <div className="fixed bottom-20 left-1/2 z-50 -translate-x-1/2 md:bottom-4">
-      <div className="flex items-center gap-2 rounded-full bg-destructive px-4 py-2 text-sm text-destructive-foreground shadow-elevated">
+    <div>
+      <div className="flex items-center gap-2 rounded-full bg-destructive px-4 py-2 text-sm text-destructive-foreground shadow-elevated dark:bg-destructive dark:text-destructive-foreground">
         <WifiOff className="h-4 w-4" />
         <span>Sem conexão</span>
       </div>

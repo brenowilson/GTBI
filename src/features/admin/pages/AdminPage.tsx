@@ -8,6 +8,7 @@ import { EditUserDialog } from "../components/EditUserDialog";
 import { InviteUserForm } from "../components/InviteUserForm";
 import { RoleMatrix } from "../components/RoleMatrix";
 import { IfoodAccountCard } from "../components/IfoodAccountCard";
+import { AddIfoodAccountForm } from "../components/AddIfoodAccountForm";
 import { ConnectIfoodAccountForm } from "../components/ConnectIfoodAccountForm";
 import { AuditLogTable } from "../components/AuditLogTable";
 import { NotificationComposer } from "../components/NotificationComposer";
@@ -287,6 +288,7 @@ export function AdminPage() {
         </TabsContent>
 
         <TabsContent value="accounts" className="space-y-4">
+          <AddIfoodAccountForm />
           <ConnectIfoodAccountForm />
           {accountsLoading ? (
             <div className="flex items-center justify-center py-12">
@@ -294,7 +296,7 @@ export function AdminPage() {
             </div>
           ) : (accounts ?? []).length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-2 py-12 text-muted-foreground">
-              <p>Nenhuma conta iFood conectada.</p>
+              <p>Nenhuma conta iFood cadastrada.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

@@ -32,8 +32,8 @@ export function InstallBanner() {
   };
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 z-50 md:bottom-4 md:left-auto md:right-4 md:w-80">
-      <div className="flex items-center gap-3 rounded-lg border border-border bg-card p-4 shadow-elevated">
+    <div>
+      <div className="flex items-center gap-3 rounded-lg border border-border bg-background p-4 shadow-elevated dark:bg-secondary">
         <Download className="h-5 w-5 flex-shrink-0 text-primary" />
         <div className="flex-1">
           <p className="text-sm font-medium">Instalar GTBI</p>

@@ -1,3 +1,4 @@
+import { Link2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,25 +33,48 @@ export function IfoodAccountCard({
   onSync,
   onDisconnect,
 }: IfoodAccountCardProps) {
+  const isManuallyAdded = !account.token_expires_at && account.is_active;
   const isTokenExpired =
     account.token_expires_at &&
     new Date(account.token_expires_at) < new Date();
+
+  function getBadge() {
+    if (!account.is_active) {
+      return (
+        <Badge
+          variant="outline"
+          className="bg-red-100 text-red-800 border-red-200"
+        >
+          Inativa
+        </Badge>
+      );
+    }
+    if (isManuallyAdded) {
+      return (
+        <Badge
+          variant="outline"
+          className="bg-blue-100 text-blue-800 border-blue-200"
+        >
+          Manual
+        </Badge>
+      );
+    }
+    return (
+      <Badge
+        variant="outline"
+        className="bg-green-100 text-green-800 border-green-200"
+      >
+        Ativa
+      </Badge>
+    );
+  }
 
   return (
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <CardTitle className="text-base">{account.name}</CardTitle>
-          <Badge
-            variant="outline"
-            className={cn(
-              account.is_active
-                ? "bg-green-100 text-green-800 border-green-200"
-                : "bg-red-100 text-red-800 border-red-200"
-            )}
-          >
-            {account.is_active ? "Ativa" : "Inativa"}
-          </Badge>
+          {getBadge()}
         </div>
       </CardHeader>
       <CardContent className="space-y-2 pb-3">
@@ -63,29 +87,43 @@ export function IfoodAccountCard({
             <span className="font-medium">Última sincronização:</span>{" "}
             {formatDateTime(account.last_sync_at)}
           </p>
-          <p>
-            <span className="font-medium">Token expira em:</span>{" "}
-            <span className={cn(isTokenExpired && "text-red-600 font-medium")}>
-              {formatDateTime(account.token_expires_at)}
-              {isTokenExpired && " (expirado)"}
-            </span>
-          </p>
+          {!isManuallyAdded && (
+            <p>
+              <span className="font-medium">Token expira em:</span>{" "}
+              <span className={cn(isTokenExpired && "text-red-600 font-medium")}>
+                {formatDateTime(account.token_expires_at)}
+                {isTokenExpired && " (expirado)"}
+              </span>
+            </p>
+          )}
         </div>
       </CardContent>
       <CardFooter className="gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onSync?.(account.id)}
-        >
-          Sincronizar
-        </Button>
+        {isManuallyAdded ? (
+          <Button
+            variant="outline"
+            size="sm"
+            disabled
+            title="Disponível após homologação da API iFood"
+          >
+            <Link2 className="mr-2 h-4 w-4" />
+            Conectar no iFood
+          </Button>
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onSync?.(account.id)}
+          >
+            Sincronizar
+          </Button>
+        )}
         <Button
           variant="destructive"
           size="sm"
           onClick={() => onDisconnect?.(account.id)}
         >
-          Desconectar
+          {isManuallyAdded ? "Remover" : "Desconectar"}
         </Button>
       </CardFooter>
     </Card>
