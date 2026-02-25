@@ -58,7 +58,6 @@ export function CreateReportModal({ open, onOpenChange }: CreateReportModalProps
   const { data: accounts } = useIfoodAccounts();
 
   function handleClose() {
-    if (step === "generating") return;
     setStep("upload");
     setFiles([]);
     setSelectedAccountId("");
@@ -186,10 +185,9 @@ export function CreateReportModal({ open, onOpenChange }: CreateReportModalProps
           <div className="flex flex-col items-center gap-4 py-8">
             <Loader2 className="h-10 w-10 animate-spin text-primary" />
             <div className="text-center">
-              <p className="font-medium">Gerando relatório...</p>
+              <p className="font-medium">Enviando capturas de tela...</p>
               <p className="text-sm text-muted-foreground">
-                As capturas de tela estão sendo analisadas pela IA para extrair os dados de desempenho.
-                Isso pode levar alguns minutos.
+                As capturas estão sendo enviadas. O relatório será gerado em segundo plano.
               </p>
             </div>
           </div>

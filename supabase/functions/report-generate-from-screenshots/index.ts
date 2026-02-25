@@ -8,12 +8,26 @@ import {
 } from "../_shared/middleware.ts";
 import { jsonResponse, ValidationError, ExternalServiceError } from "../_shared/errors.ts";
 import { logAudit, getClientIp } from "../_shared/audit.ts";
-import { chatCompletion } from "../_shared/openai.ts";
+import {
+  chatCompletionWithUsage,
+  logApiUsage,
+  estimateCost,
+  type TokenUsage,
+} from "../_shared/openai.ts";
 import { createLogger } from "../_shared/logger.ts";
+
+declare const EdgeRuntime: {
+  waitUntil(promise: Promise<unknown>): void;
+};
 
 const log = createLogger("report-generate-from-screenshots");
 
 const OPENAI_API_URL = "https://api.openai.com/v1";
+const EDGE_FUNCTION_NAME = "report-generate-from-screenshots";
+
+// ============================================
+// Types
+// ============================================
 
 interface ExtractedData {
   financial: {
@@ -70,12 +84,33 @@ interface ExtractedData {
   };
 }
 
+type ImageContent = {
+  type: "image_url";
+  image_url: { url: string; detail: "high" };
+};
+
+interface BackgroundParams {
+  adminClient: SupabaseClient;
+  userId: string;
+  reportId: string;
+  screenshotPaths: string[];
+  accountName: string;
+  weekStart: string;
+  weekEnd: string;
+  restaurantId: string | null;
+  ifoodAccountId: string | null;
+  clientIp: string | undefined;
+}
+
+// ============================================
+// Handler (synchronous — returns immediately)
+// ============================================
+
 /**
  * POST /report-generate-from-screenshots
  *
- * Generates a weekly BI report from uploaded iFood dashboard screenshots.
- * Uses GPT-4o Vision to extract structured data, then generates HTML report
- * and AI-powered recommended actions.
+ * Creates a report record with "generating" status and schedules
+ * background processing via EdgeRuntime.waitUntil.
  *
  * Body: {
  *   screenshot_paths: string[],
@@ -137,76 +172,121 @@ const handler = withMiddleware(
       if (account?.name) accountName = account.name;
     }
 
-    log.info("Downloading screenshots from storage", {
-      count: screenshot_paths.length,
+    // Create report record with "generating" status — returns immediately
+    const { data: report, error: reportError } = await adminClient
+      .from("reports")
+      .insert({
+        restaurant_id: restaurant_id || null,
+        ifood_account_id: ifood_account_id || null,
+        week_start: effectiveWeekStart,
+        week_end: effectiveWeekEnd,
+        status: "generating",
+        source: "screenshots",
+        generated_at: new Date().toISOString(),
+      })
+      .select("id, restaurant_id, ifood_account_id, week_start, week_end, status, source, generated_at")
+      .single();
+
+    if (reportError || !report) {
+      throw new Error(`Failed to create report: ${reportError?.message}`);
+    }
+
+    // Link screenshots to report with "processing" status
+    for (const path of screenshot_paths) {
+      await adminClient
+        .from("report_screenshots")
+        .update({ report_id: report.id, processing_status: "processing" })
+        .eq("storage_path", path);
+    }
+
+    log.info("Report created with generating status, scheduling background processing", {
+      reportId: report.id,
+      screenshotCount: screenshot_paths.length,
     });
 
-    // Download screenshots from storage and convert to base64
-    const imageContents: Array<{
-      type: "image_url";
-      image_url: { url: string; detail: "high" };
-    }> = [];
+    // Schedule background processing
+    EdgeRuntime.waitUntil(
+      processReportInBackground({
+        adminClient,
+        userId,
+        reportId: report.id,
+        screenshotPaths: screenshot_paths,
+        accountName,
+        weekStart: effectiveWeekStart,
+        weekEnd: effectiveWeekEnd,
+        restaurantId: restaurant_id || null,
+        ifoodAccountId: ifood_account_id || null,
+        clientIp: getClientIp(req),
+      }),
+    );
 
-    for (const path of screenshot_paths) {
-      const { data: fileData, error: downloadError } = await adminClient.storage
-        .from("report-screenshots")
-        .download(path);
+    // Return immediately
+    return jsonResponse({
+      success: true,
+      report: { ...report },
+    }, 201);
+  },
+  { permission: ["reports", "create"] },
+);
 
-      if (downloadError || !fileData) {
-        log.warn("Failed to download screenshot", { path, error: downloadError?.message });
-        continue;
-      }
+// ============================================
+// Background Processing
+// ============================================
 
-      const arrayBuffer = await fileData.arrayBuffer();
-      const uint8 = new Uint8Array(arrayBuffer);
-      let binaryStr = "";
-      for (let i = 0; i < uint8.length; i++) {
-        binaryStr += String.fromCharCode(uint8[i]);
-      }
-      const base64 = btoa(binaryStr);
-      const mimeType = fileData.type || "image/png";
+async function processReportInBackground(params: BackgroundParams): Promise<void> {
+  const {
+    adminClient,
+    userId,
+    reportId,
+    screenshotPaths,
+    accountName,
+    weekStart,
+    weekEnd,
+    restaurantId,
+    ifoodAccountId,
+    clientIp,
+  } = params;
 
-      imageContents.push({
-        type: "image_url",
-        image_url: {
-          url: `data:${mimeType};base64,${base64}`,
-          detail: "high",
-        },
+  try {
+    // 1. Download screenshots from storage
+    log.info("Downloading screenshots", { reportId, count: screenshotPaths.length });
+    const imageContents = await downloadScreenshots(adminClient, screenshotPaths);
+
+    if (imageContents.length === 0) {
+      throw new Error("No valid screenshots could be downloaded");
+    }
+
+    // 2. Extract data with GPT-4o Vision
+    log.info("Extracting data with Vision API", { reportId, imageCount: imageContents.length });
+    const { data: extractedData, usage: visionUsage } =
+      await extractDataFromScreenshots(imageContents);
+
+    // Log Vision API usage
+    if (visionUsage) {
+      await logApiUsage(adminClient, {
+        userId,
+        edgeFunction: EDGE_FUNCTION_NAME,
+        model: "gpt-4o",
+        promptTokens: visionUsage.prompt_tokens,
+        completionTokens: visionUsage.completion_tokens,
+        totalTokens: visionUsage.total_tokens,
+        estimatedCost: estimateCost("gpt-4o", visionUsage.prompt_tokens, visionUsage.completion_tokens),
+        metadata: { step: "vision_extraction", report_id: reportId, screenshot_count: screenshotPaths.length },
       });
     }
 
-    if (imageContents.length === 0) {
-      throw new ValidationError("No valid screenshots could be downloaded");
-    }
+    // 3. Generate report HTML
+    log.info("Generating report HTML", { reportId });
+    const reportHtml = buildScreenshotReportHtml(accountName, weekStart, weekEnd, extractedData);
 
-    log.info("Sending screenshots to GPT-4o Vision for extraction", {
-      imageCount: imageContents.length,
-    });
-
-    // Extract structured data from screenshots using GPT-4o Vision
-    const extractedData = await extractDataFromScreenshots(imageContents);
-
-    log.info("Data extracted successfully, generating report HTML");
-
-    // Generate report HTML
-    const reportHtml = buildScreenshotReportHtml(
-      accountName,
-      effectiveWeekStart,
-      effectiveWeekEnd,
-      extractedData,
-    );
-
-    // Upload HTML to reports storage
+    // 4. Upload HTML to storage
     const fileId = crypto.randomUUID();
-    const pdfFileName = `screenshots/${fileId}/${effectiveWeekStart}-report.html`;
+    const pdfFileName = `screenshots/${fileId}/${weekStart}-report.html`;
     const htmlBlob = new Blob([reportHtml], { type: "text/html" });
 
     const { error: uploadError } = await adminClient.storage
       .from("reports")
-      .upload(pdfFileName, htmlBlob, {
-        contentType: "text/html",
-        upsert: true,
-      });
+      .upload(pdfFileName, htmlBlob, { contentType: "text/html", upsert: true });
 
     let pdfUrl: string | null = null;
     if (!uploadError) {
@@ -218,100 +298,128 @@ const handler = withMiddleware(
       log.error("Failed to upload report HTML", { error: uploadError.message });
     }
 
-    // Create report record
-    const { data: report, error: reportError } = await adminClient
-      .from("reports")
-      .insert({
-        restaurant_id: restaurant_id || null,
-        ifood_account_id: ifood_account_id || null,
-        week_start: effectiveWeekStart,
-        week_end: effectiveWeekEnd,
-        status: "generated",
-        source: "screenshots",
-        pdf_url: pdfUrl,
-        generated_at: new Date().toISOString(),
-      })
-      .select("id, restaurant_id, ifood_account_id, week_start, week_end, status, source, pdf_url, generated_at")
-      .single();
+    // 5. Generate AI actions
+    log.info("Generating AI actions", { reportId });
+    const { actions, usage: actionsUsage } = await generateScreenshotActions(
+      adminClient, userId, reportId, restaurantId, weekStart, extractedData,
+    );
 
-    if (reportError || !report) {
-      throw new Error(`Failed to create report: ${reportError?.message}`);
+    // Log actions API usage
+    if (actionsUsage) {
+      await logApiUsage(adminClient, {
+        userId,
+        edgeFunction: EDGE_FUNCTION_NAME,
+        model: "gpt-4o",
+        promptTokens: actionsUsage.prompt_tokens,
+        completionTokens: actionsUsage.completion_tokens,
+        totalTokens: actionsUsage.total_tokens,
+        estimatedCost: estimateCost("gpt-4o", actionsUsage.prompt_tokens, actionsUsage.completion_tokens),
+        metadata: { step: "action_generation", report_id: reportId },
+      });
     }
 
-    log.info("Report record created", { reportId: report.id });
+    // 6. Generate checklist
+    await generateScreenshotChecklist(adminClient, reportId, restaurantId, weekStart, extractedData);
 
-    // Link screenshots to report
-    for (const path of screenshot_paths) {
+    // 7. Update screenshots to completed
+    for (const path of screenshotPaths) {
       await adminClient
         .from("report_screenshots")
-        .update({ report_id: report.id, processing_status: "completed" })
+        .update({ processing_status: "completed" })
         .eq("storage_path", path);
     }
 
-    // Generate AI-powered recommended actions
-    const actions = await generateScreenshotActions(
-      adminClient,
-      userId,
-      report.id,
-      restaurant_id || null,
-      effectiveWeekStart,
-      extractedData,
-    );
+    // 8. Update report to "generated" — triggers Realtime subscription
+    await adminClient
+      .from("reports")
+      .update({ status: "generated", pdf_url: pdfUrl })
+      .eq("id", reportId);
 
-    // Generate checklist items
-    await generateScreenshotChecklist(
-      adminClient,
-      report.id,
-      restaurant_id || null,
-      effectiveWeekStart,
-      extractedData,
-    );
+    log.info("Report generation completed", { reportId, actionsCount: actions.length });
 
-    // Audit log
+    // 9. Audit log
     await logAudit(adminClient, {
       userId,
       action: "generate_report_from_screenshots",
       entity: "reports",
-      entityId: report.id,
+      entityId: reportId,
       newData: {
-        screenshot_count: screenshot_paths.length,
-        ifood_account_id,
-        week_start: effectiveWeekStart,
-        week_end: effectiveWeekEnd,
+        screenshot_count: screenshotPaths.length,
+        ifood_account_id: ifoodAccountId,
+        week_start: weekStart,
+        week_end: weekEnd,
         actions_count: actions.length,
       },
-      ipAddress: getClientIp(req),
+      ipAddress: clientIp,
     });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    log.error("Background processing failed", { reportId, error: errorMessage });
 
-    return jsonResponse({
-      success: true,
-      report: {
-        id: report.id,
-        restaurant_id: report.restaurant_id,
-        ifood_account_id: report.ifood_account_id,
-        week_start: report.week_start,
-        week_end: report.week_end,
-        status: report.status,
-        source: report.source,
-        pdf_url: report.pdf_url,
-        generated_at: report.generated_at,
+    // Update report status to "failed" — triggers Realtime subscription
+    await adminClient
+      .from("reports")
+      .update({ status: "failed" })
+      .eq("id", reportId);
+
+    // Update screenshots to failed
+    for (const path of screenshotPaths) {
+      await adminClient
+        .from("report_screenshots")
+        .update({ processing_status: "failed" })
+        .eq("storage_path", path);
+    }
+  }
+}
+
+// ============================================
+// Screenshot Download
+// ============================================
+
+async function downloadScreenshots(
+  adminClient: SupabaseClient,
+  paths: string[],
+): Promise<ImageContent[]> {
+  const imageContents: ImageContent[] = [];
+
+  for (const path of paths) {
+    const { data: fileData, error: downloadError } = await adminClient.storage
+      .from("report-screenshots")
+      .download(path);
+
+    if (downloadError || !fileData) {
+      log.warn("Failed to download screenshot", { path, error: downloadError?.message });
+      continue;
+    }
+
+    const arrayBuffer = await fileData.arrayBuffer();
+    const uint8 = new Uint8Array(arrayBuffer);
+    let binaryStr = "";
+    for (let i = 0; i < uint8.length; i++) {
+      binaryStr += String.fromCharCode(uint8[i]);
+    }
+    const base64 = btoa(binaryStr);
+    const mimeType = fileData.type || "image/png";
+
+    imageContents.push({
+      type: "image_url",
+      image_url: {
+        url: `data:${mimeType};base64,${base64}`,
+        detail: "high",
       },
-      extracted_data: extractedData,
-      actions_count: actions.length,
-    }, 201);
-  },
-  { permission: ["reports", "create"] },
-);
+    });
+  }
 
-/**
- * Sends screenshots to GPT-4o Vision API for structured data extraction.
- */
+  return imageContents;
+}
+
+// ============================================
+// Vision Data Extraction
+// ============================================
+
 async function extractDataFromScreenshots(
-  imageContents: Array<{
-    type: "image_url";
-    image_url: { url: string; detail: "high" };
-  }>,
-): Promise<ExtractedData> {
+  imageContents: ImageContent[],
+): Promise<{ data: ExtractedData; usage: TokenUsage | null }> {
   const apiKey = Deno.env.get("OPENAI_API_KEY");
   if (!apiKey) {
     throw new ExternalServiceError("OpenAI", "OPENAI_API_KEY not configured");
@@ -387,7 +495,7 @@ Respond ONLY with valid JSON matching this exact structure:
 
   const userContent: Array<
     | { type: "text"; text: string }
-    | { type: "image_url"; image_url: { url: string; detail: "high" } }
+    | ImageContent
   > = [
     {
       type: "text",
@@ -421,8 +529,15 @@ Respond ONLY with valid JSON matching this exact structure:
     );
   }
 
-  const data = await response.json();
-  const content = data.choices?.[0]?.message?.content ?? "";
+  const responseData = await response.json();
+  const content = responseData.choices?.[0]?.message?.content ?? "";
+  const usage: TokenUsage | null = responseData.usage
+    ? {
+        prompt_tokens: responseData.usage.prompt_tokens ?? 0,
+        completion_tokens: responseData.usage.completion_tokens ?? 0,
+        total_tokens: responseData.usage.total_tokens ?? 0,
+      }
+    : null;
 
   // Parse JSON from response (may be wrapped in markdown code block)
   const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -435,7 +550,8 @@ Respond ONLY with valid JSON matching this exact structure:
   }
 
   try {
-    return JSON.parse(jsonMatch[0]) as ExtractedData;
+    const extractedData = JSON.parse(jsonMatch[0]) as ExtractedData;
+    return { data: extractedData, usage };
   } catch {
     log.error("JSON parse error on extracted data", { raw: jsonMatch[0] });
     throw new ExternalServiceError(
@@ -445,9 +561,10 @@ Respond ONLY with valid JSON matching this exact structure:
   }
 }
 
-/**
- * Builds the report HTML from extracted screenshot data.
- */
+// ============================================
+// Report HTML Generation
+// ============================================
+
 function buildScreenshotReportHtml(
   accountName: string,
   weekStart: string,
@@ -473,30 +590,20 @@ function buildScreenshotReportHtml(
   };
 
   const topItemsHtml = (data.menu.top_items ?? [])
-    .map(
-      (item) =>
-        `<div class="menu-item"><span>${item.name}</span><span class="quantity">${item.quantity} vendas</span></div>`,
-    )
+    .map((item) => `<div class="menu-item"><span>${item.name}</span><span class="quantity">${item.quantity} vendas</span></div>`)
     .join("");
 
   const leastSoldHtml = (data.menu.least_sold_items ?? [])
-    .map(
-      (item) =>
-        `<div class="menu-item"><span>${item.name}</span><span class="quantity">${item.quantity} vendas</span></div>`,
-    )
+    .map((item) => `<div class="menu-item"><span>${item.name}</span><span class="quantity">${item.quantity} vendas</span></div>`)
     .join("");
 
   const customerProfileHtml = Object.entries(data.customers.profile ?? {})
     .filter(([, v]) => v !== null)
-    .map(
-      ([k, v]) => `<div class="metric-card"><div class="value">${fmt(v)}</div><div class="label">${translateProfileKey(k)}</div></div>`,
-    )
+    .map(([k, v]) => `<div class="metric-card"><div class="value">${fmt(v)}</div><div class="label">${translateProfileKey(k)}</div></div>`)
     .join("");
 
   const competitorHtml = Object.entries(data.competition.direct_competitors ?? {})
-    .map(
-      ([k, v]) => `<div class="financial-row"><span class="label">${k}</span><span class="value">${fmtPct(v)}</span></div>`,
-    )
+    .map(([k, v]) => `<div class="financial-row"><span class="label">${k}</span><span class="value">${fmtPct(v)}</span></div>`)
     .join("");
 
   return `
@@ -668,9 +775,10 @@ function translateProfileKey(key: string): string {
   return translations[key] ?? key;
 }
 
-/**
- * Generates AI-powered actions based on extracted screenshot data.
- */
+// ============================================
+// AI Action Generation
+// ============================================
+
 async function generateScreenshotActions(
   adminClient: SupabaseClient,
   userId: string,
@@ -678,7 +786,7 @@ async function generateScreenshotActions(
   restaurantId: string | null,
   weekStart: string,
   data: ExtractedData,
-): Promise<Array<{ id: string }>> {
+): Promise<{ actions: Array<{ id: string }>; usage: TokenUsage | null }> {
   const metricsContext = `
 Current week metrics (extracted from iFood dashboard screenshots):
 - Total Orders: ${data.financial.total_orders ?? "N/A"}
@@ -698,9 +806,10 @@ Current week metrics (extracted from iFood dashboard screenshots):
     goal: string;
     action_type: string;
   }> = [];
+  let usage: TokenUsage | null = null;
 
   try {
-    const aiResponse = await chatCompletion({
+    const aiResult = await chatCompletionWithUsage({
       systemPrompt: `You are a restaurant business intelligence consultant for iFood restaurants in Brazil.
 Analyze the metrics extracted from dashboard screenshots and suggest 3-5 concrete, actionable recommendations.
 Respond ONLY with a JSON array of objects with keys: title, description, goal, action_type.
@@ -711,7 +820,8 @@ Keep responses in Portuguese (Brazil). Be specific and practical.`,
       maxTokens: 1024,
     });
 
-    const jsonMatch = aiResponse.match(/\[[\s\S]*\]/);
+    usage = aiResult.usage;
+    const jsonMatch = aiResult.content.match(/\[[\s\S]*\]/);
     if (jsonMatch) {
       aiActions = JSON.parse(jsonMatch[0]);
     }
@@ -753,7 +863,7 @@ Keep responses in Portuguese (Brazil). Be specific and practical.`,
     }
   }
 
-  return insertedActions;
+  return { actions: insertedActions, usage };
 }
 
 function generateFallbackActions(
@@ -816,6 +926,10 @@ function generateFallbackActions(
 
   return actions;
 }
+
+// ============================================
+// Checklist Generation
+// ============================================
 
 async function generateScreenshotChecklist(
   adminClient: SupabaseClient,

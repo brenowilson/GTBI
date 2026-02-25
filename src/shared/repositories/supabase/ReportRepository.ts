@@ -165,6 +165,8 @@ export class SupabaseReportRepository implements IReportRepository {
   }
 
   async generateFromScreenshots(input: GenerateFromScreenshotsInput): Promise<Report> {
+    const idempotencyKey = crypto.randomUUID();
+
     const { data, error } = await invokeFunction<{ report: Report }>(
       "report-generate-from-screenshots",
       {
@@ -173,6 +175,9 @@ export class SupabaseReportRepository implements IReportRepository {
         restaurant_id: input.restaurantId,
         week_start: input.weekStart,
         week_end: input.weekEnd,
+      },
+      {
+        headers: { "x-idempotency-key": idempotencyKey },
       },
     );
 

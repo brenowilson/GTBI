@@ -1,6 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRealtimeSubscription } from "@/shared/hooks/useRealtimeSubscription";
-import { useRestaurantStore } from "@/stores/restaurant.store";
 import { toast } from "@/shared/hooks/use-toast";
 
 interface ReportRow extends Record<string, unknown> {
@@ -27,15 +26,10 @@ const STATUS_LABELS: Record<string, { title: string; description: string }> = {
 
 export function useReportRealtime() {
   const queryClient = useQueryClient();
-  const { selectedRestaurant } = useRestaurantStore();
-  const restaurantId = selectedRestaurant?.id;
 
   useRealtimeSubscription<ReportRow>(
     {
       table: "reports",
-      filter: restaurantId
-        ? `restaurant_id=eq.${restaurantId}`
-        : undefined,
       event: "UPDATE",
       onPayload: (payload) => {
         queryClient.invalidateQueries({ queryKey: ["reports"] });
@@ -55,6 +49,6 @@ export function useReportRealtime() {
         }
       },
     },
-    !!restaurantId
+    true
   );
 }

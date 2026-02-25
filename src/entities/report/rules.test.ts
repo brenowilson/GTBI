@@ -17,6 +17,18 @@ const makeReport = (status: Report["status"]): Report => ({
 });
 
 describe("ReportRules", () => {
+  it("allows transition from generating to generated", () => {
+    expect(ReportRules.canTransitionTo(makeReport("generating"), "generated")).toBe(true);
+  });
+
+  it("allows transition from generating to failed", () => {
+    expect(ReportRules.canTransitionTo(makeReport("generating"), "failed")).toBe(true);
+  });
+
+  it("disallows transition from generating to sent", () => {
+    expect(ReportRules.canTransitionTo(makeReport("generating"), "sent")).toBe(false);
+  });
+
   it("allows transition from generated to sending", () => {
     expect(ReportRules.canTransitionTo(makeReport("generated"), "sending")).toBe(true);
   });

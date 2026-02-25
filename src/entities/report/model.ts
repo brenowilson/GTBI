@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const reportStatusSchema = z.enum(["generated", "sending", "sent", "failed"]);
+export const reportStatusSchema = z.enum(["generating", "generated", "sending", "sent", "failed"]);
 export type ReportStatus = z.infer<typeof reportStatusSchema>;
 
 export const reportSourceSchema = z.enum(["api", "screenshots"]);

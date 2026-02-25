@@ -28,8 +28,8 @@ export function useGenerateReportFromScreenshots() {
       if (result.success) {
         queryClient.invalidateQueries({ queryKey: ["reports"] });
         toast({
-          title: "Relatório gerado",
-          description: "O relatório foi gerado a partir das capturas de tela.",
+          title: "Relatório em geração",
+          description: "O relatório está sendo gerado em segundo plano. Você será notificado quando estiver pronto.",
         });
       } else {
         toast({

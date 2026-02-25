@@ -94,6 +94,7 @@ export function ReportsPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="generating">Gerando</SelectItem>
               <SelectItem value="generated">Gerado</SelectItem>
               <SelectItem value="sending">Enviando</SelectItem>
               <SelectItem value="sent">Enviado</SelectItem>

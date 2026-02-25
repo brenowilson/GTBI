@@ -25,6 +25,7 @@ interface ReportCardProps {
 }
 
 const statusLabels: Record<ReportStatus, string> = {
+  generating: "Gerando...",
   generated: "Gerado",
   sending: "Enviando",
   sent: "Enviado",
@@ -32,6 +33,7 @@ const statusLabels: Record<ReportStatus, string> = {
 };
 
 const statusStyles: Record<ReportStatus, string> = {
+  generating: "bg-orange-100 text-orange-800 border-orange-200",
   generated: "bg-blue-100 text-blue-800 border-blue-200",
   sending: "bg-yellow-100 text-yellow-800 border-yellow-200",
   sent: "bg-green-100 text-green-800 border-green-200",

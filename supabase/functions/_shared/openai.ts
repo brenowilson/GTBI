@@ -1,3 +1,4 @@
+import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { ExternalServiceError } from "./errors.ts";
 
 const OPENAI_API_URL = "https://api.openai.com/v1";
@@ -10,6 +11,10 @@ function getApiKey(): string {
   return key;
 }
 
+// ============================================
+// Chat Completion
+// ============================================
+
 export interface ChatCompletionOptions {
   model?: string;
   systemPrompt?: string;
@@ -18,13 +23,24 @@ export interface ChatCompletionOptions {
   maxTokens?: number;
 }
 
+export interface TokenUsage {
+  prompt_tokens: number;
+  completion_tokens: number;
+  total_tokens: number;
+}
+
+export interface ChatCompletionResult {
+  content: string;
+  usage: TokenUsage | null;
+}
+
 /**
- * Sends a chat completion request to OpenAI.
+ * Sends a chat completion request to OpenAI and returns content + usage data.
  * Default model: gpt-4o
  */
-export async function chatCompletion(
+export async function chatCompletionWithUsage(
   options: ChatCompletionOptions,
-): Promise<string> {
+): Promise<ChatCompletionResult> {
   const apiKey = getApiKey();
   const model = options.model ?? "gpt-4o";
 
@@ -58,8 +74,94 @@ export async function chatCompletion(
   }
 
   const data = await response.json();
-  return data.choices?.[0]?.message?.content ?? "";
+  const content = data.choices?.[0]?.message?.content ?? "";
+  const usage: TokenUsage | null = data.usage
+    ? {
+        prompt_tokens: data.usage.prompt_tokens ?? 0,
+        completion_tokens: data.usage.completion_tokens ?? 0,
+        total_tokens: data.usage.total_tokens ?? 0,
+      }
+    : null;
+
+  return { content, usage };
 }
+
+/**
+ * Sends a chat completion request to OpenAI.
+ * Default model: gpt-4o
+ *
+ * Backward-compatible wrapper — returns only the content string.
+ */
+export async function chatCompletion(
+  options: ChatCompletionOptions,
+): Promise<string> {
+  const result = await chatCompletionWithUsage(options);
+  return result.content;
+}
+
+// ============================================
+// API Usage Tracking
+// ============================================
+
+const COST_PER_1K_TOKENS: Record<string, { input: number; output: number }> = {
+  "gpt-4o": { input: 0.0025, output: 0.01 },
+  "gpt-4o-mini": { input: 0.00015, output: 0.0006 },
+};
+
+const DEFAULT_COST_PER_1K = { input: 0.003, output: 0.015 };
+
+/**
+ * Estimates the cost in USD based on model and token counts.
+ */
+export function estimateCost(
+  model: string,
+  promptTokens: number,
+  completionTokens: number,
+): number {
+  const rates = COST_PER_1K_TOKENS[model] ?? DEFAULT_COST_PER_1K;
+  return (promptTokens / 1000) * rates.input +
+    (completionTokens / 1000) * rates.output;
+}
+
+export interface ApiUsageEntry {
+  userId?: string;
+  edgeFunction: string;
+  model: string;
+  promptTokens: number;
+  completionTokens: number;
+  totalTokens: number;
+  estimatedCost: number;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * Logs an API usage entry to the api_usage_logs table.
+ * Non-throwing — logs error to console but does not break the main flow.
+ * Same pattern as logAudit in _shared/audit.ts.
+ */
+export async function logApiUsage(
+  adminClient: SupabaseClient,
+  entry: ApiUsageEntry,
+): Promise<void> {
+  const { error } = await adminClient.from("api_usage_logs").insert({
+    user_id: entry.userId ?? null,
+    edge_function: entry.edgeFunction,
+    model: entry.model,
+    prompt_tokens: entry.promptTokens,
+    completion_tokens: entry.completionTokens,
+    total_tokens: entry.totalTokens,
+    estimated_cost: entry.estimatedCost,
+    metadata: entry.metadata ?? null,
+  });
+
+  if (error) {
+    console.error("Failed to log API usage:", error.message);
+  }
+}
+
+// ============================================
+// Image Generation
+// ============================================
 
 export interface ImageGenerationOptions {
   prompt: string;

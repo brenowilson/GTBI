@@ -1,6 +1,7 @@
 import type { Report, ReportStatus } from "./model";
 
 const VALID_TRANSITIONS: Record<ReportStatus, ReportStatus[]> = {
+  generating: ["generated", "failed"],
   generated: ["sending"],
   sending: ["sent", "failed"],
   sent: [],
